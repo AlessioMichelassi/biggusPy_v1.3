@@ -15,12 +15,11 @@ class NumberNode(AbstractNodeInterface):
     colorTrain = [QColor(177, 225, 40), QColor(95, 217, 173), QColor(143, 129, 158), QColor(91, 240, 171),
                   QColor(220, 215, 146), QColor(30, 31, 2), QColor(97, 239, 255), QColor(149, 97, 228), ]
 
-    def __init__(self, value=20, inNum=1, outNum=1, parent=None):
+    def __init__(self, value=80, inNum=1, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
         self.setClassName("NumberNode")
         self.setName("NumberNode")
         self.changeSize(self.width, self.height)
-        self.changeInputValue(value, 0, True)
 
     def calculateOutput(self, plugIndex):
         value = self.inPlugs[0].getValue()

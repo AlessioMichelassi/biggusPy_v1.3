@@ -208,6 +208,7 @@ class AbstractNodeGraphic(QGraphicsItem):
     def __init__(self, nodeInterface, parent=None):
         super(AbstractNodeGraphic, self).__init__(parent)
         self.nodeInterface = nodeInterface
+        self.nodeData = self.nodeInterface.nodeData
         self.contextMenu = QMenu()
         self.inPlugs = []
         self.outPlugs = []
@@ -370,7 +371,6 @@ class AbstractNodeGraphic(QGraphicsItem):
         self.txtValueProxy.setWidget(self.txtValue)
         self.txtValueProxy.setZValue(2)
         self.txtValue.setFocus()
-        self.setTextValueOnQLineEdit(self.nodeInterface.getOutputValue(0))
         self.txtValue.returnPressed.connect(self.setTxtValue)
         self.initTxtValueProperties()
         self.updateTxtValuePosition()

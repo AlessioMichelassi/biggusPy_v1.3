@@ -14,6 +14,7 @@ class Arrow(QGraphicsItem):
         self.endPlug = None
         self.startPoint = startPlug.scenePos()
         self.endPoint = end_point
+        self.setZValue(-1)
 
     def updatePosition(self, pos):
         self.endPoint = pos

@@ -33,6 +33,9 @@ class PlugData:
         return self._value
 
     def setValue(self, value):
+        print("Debug: class PlugData, function setValue, value: ", value)
+        if value == 10:
+            raise Exception
         self._value = value
         if self.plugGraphic:
             # aggiorna solo il valore basato sull'out[0]

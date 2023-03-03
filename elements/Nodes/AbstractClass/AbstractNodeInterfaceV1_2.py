@@ -19,7 +19,7 @@ A node consists of:
                     nodeInterface
                     |            \
                     |             \
-                nodeGraphic     nodeData
+            nodeGraphic         nodeData
 
 ITA:
 Di per se un nodo non fa niente di particolare, a parte prendere un valore in ingresso
@@ -61,13 +61,14 @@ class AbstractNodeInterface:
     mainWidget = None
     _isNodeCreated = False
 
-    def __init__(self, value=10, inNum=1, outNum=1, parent=None):
+    def __init__(self, value=220, inNum=1, outNum=1, parent=None):
         self.nodeData = AbstractNodeData("AbstractNodeInterface", self)
+
         self.nodeGraphic = AbstractNodeGraphic(self)
         self.contextMenu = self.nodeGraphic.contextMenu
         self.createPlug(inNum, outNum)
-        self.setInputValue(0, value)
         self.initGraphics()
+        self.nodeData.changeValue(0, value, True)
 
     @property
     def className(self):

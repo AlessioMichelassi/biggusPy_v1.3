@@ -64,7 +64,7 @@ class Canvas(QWidget):
         if action == actionCenterObject:
             self.graphicView.selectAllCenterSceneAndDeselect()
         if action == _numberNode:
-            self.addNodeByName("NumberNode", value=10)
+            self.addNodeByName("NumberNode")
         elif action == _stringNode:
             self.addNodeByName("StringNode", value="Hello World")
         elif action == _listNode:
@@ -124,9 +124,11 @@ class Canvas(QWidget):
         """
         module = importlib.import_module(f"elements.Nodes.PythonNodes.{className}")
         nodeInterface = AbstractNodeInterface()
-
         nodeClass = getattr(module, className)
-        return nodeClass(*args, **kwargs)
+        node = nodeClass(*args, **kwargs)
+        if className == "NumberNode":
+            node.startValue = kwargs.get("value", node.startValue)  # Aggiorna il valore di partenza del nodo
+        return node
 
     def addNode(self, node):
         _node = self.updateTitle(node)

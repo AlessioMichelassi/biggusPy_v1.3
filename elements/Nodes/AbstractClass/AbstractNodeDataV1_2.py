@@ -25,7 +25,7 @@ class AbstractNodeData:
     def getTitle(self):
         return f"{self.name}_{self.index}"
 
-    def changeValue(self, value, index=0, isAResetValue=False):
+    def changeValue(self, index=0, value=1, isAResetValue=False):
         """
         ITA:
             Cambia il valore di un plug di input.
