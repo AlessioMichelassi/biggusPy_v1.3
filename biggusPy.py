@@ -5,10 +5,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-
 import configparser
 
 from widgets.Canvas.Canvas import Canvas
+
+from scratchNodeV0_9.scratchNode import scratchNodeV0_9
 
 
 class biggusPy(QMainWindow):
@@ -198,7 +199,8 @@ class biggusPy(QMainWindow):
             print(ppj)
 
     def onGraphicEditor(self):
-        pass
+        scratchNode = scratchNodeV0_9(self.canvas)
+        scratchNode.show()
 
     # ################################################
     #

@@ -84,7 +84,6 @@ class AbstractNodeInterface:
 
     def updateAll(self):
         self.nodeGraphic.updateTitlePosition()
-        self.nodeGraphic.updateTxtValueWidth()
         self.nodeGraphic.updateTxtValuePosition()
         self.nodeGraphic.updatePlugsPos()
         self.nodeGraphic.updateLogoPosition()

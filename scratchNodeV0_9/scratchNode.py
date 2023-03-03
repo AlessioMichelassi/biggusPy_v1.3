@@ -60,6 +60,7 @@ class scratchNodeV0_9(QMainWindow):
         self.setMenuBar(self.menu)
 
     def initGeometry(self):
+        self.setWindowTitle("ScratchO!")
         self.setContentsMargins(10, 10, 10, 10)
 
     def initStatusBar(self):
