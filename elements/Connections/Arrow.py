@@ -12,9 +12,10 @@ class Arrow(QGraphicsItem):
         super().__init__(parent)
         self.startPlug = startPlug
         self.endPlug = None
+        # startPoint è il centro del plug
         self.startPoint = startPlug.scenePos()
         self.endPoint = end_point
-        self.setZValue(-1)
+        self.setZValue(-100)
 
     def updatePosition(self, pos):
         self.endPoint = pos

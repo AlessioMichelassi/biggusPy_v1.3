@@ -20,6 +20,7 @@ class NumberNode(AbstractNodeInterface):
         self.setClassName("NumberNode")
         self.setName("NumberNode")
         self.changeSize(self.width, self.height)
+        self.changeInputValue(0, value, True)
 
     def calculateOutput(self, plugIndex):
         value = self.inPlugs[0].getValue()
@@ -49,20 +50,20 @@ class NumberNode(AbstractNodeInterface):
 
     def randomInt(self):
         value = random.randint(1, 99)
-        self.changeInputValue(value, 0, True)
+        self.changeInputValue(0, value, True)
         self.updateAll()
 
     def randomFloat(self):
         value = random.uniform(1.0, 99.0)
-        self.changeInputValue(value, 0, True)
+        self.changeInputValue(0, value, True)
         self.updateAll()
 
     def pi(self):
         value = math.pi
-        self.changeInputValue(value, 0, True)
+        self.changeInputValue(0, value, True)
         self.updateAll()
 
     def euler(self):
         value = math.e
-        self.changeInputValue(value, 0, True)
+        self.changeInputValue(0, value, True)
         self.updateAll()

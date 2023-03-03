@@ -19,6 +19,7 @@ class Connection(QGraphicsItem):
 
         self.checkTheRightPlugType(outputNode, outputPlug, outIndex, inputNode, inputPlug, inIndex)
         self.setFlag(QGraphicsItem.ItemIsSelectable)
+        self.setZValue(-100)
 
     def checkTheRightPlugType(self, outputNode, outputPlug, outIndex, inputNode, inputPlug, inIndex):
         if "Out" in outputPlug.className:
@@ -42,7 +43,7 @@ class Connection(QGraphicsItem):
     def updateValue(self):
         self.outputNode.calculate()
         value = self.outputNode.outPlugs[self.outIndex].getValue()
-        self.inputNode.inPlugs[self.inIndex].setValue(value[0], value[1], value[2])
+        self.inputNode.inPlugs[self.inIndex].setValue(value)
         self.inputNode.calculate()
         if self.inputNode.outConnections:
             for connection in self.inputNode.outConnections:
@@ -69,7 +70,7 @@ class Connection(QGraphicsItem):
             painter.setPen(QPen(QColor(0, 20, 20), 3))
         else:
             painter.setPen(QPen(QColor(250, 50, 50), 3))
-        painter.drawLine(self.outputPlug.plugGraphic.scenePos(), self.inputPlug.plugGraphic.scenePos())
+        painter.drawLine(self.outputPlug.plugGraphic.center(), self.inputPlug.plugGraphic.center())
 
     def serialize(self):
         dicts = {

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import json
+from collections import OrderedDict
+
 from elements.Nodes.AbstractClass.AbstractNodeDataV1_2 import AbstractNodeData
 from elements.Nodes.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
 from elements.Plugs.PlugData import PlugData
@@ -60,19 +63,26 @@ class AbstractNodeInterface:
     canvas = None
     mainWidget = None
     _isNodeCreated = False
+    # this variable is used to set the value of the plug to check the compatibility
+    valueType = int
 
     def __init__(self, value=220, inNum=1, outNum=1, parent=None):
         self.nodeData = AbstractNodeData("AbstractNodeInterface", self)
-
         self.nodeGraphic = AbstractNodeGraphic(self)
         self.contextMenu = self.nodeGraphic.contextMenu
         self.createPlug(inNum, outNum)
         self.initGraphics()
-        self.nodeData.changeValue(0, value, True)
 
     @property
     def className(self):
         return self.nodeData.className
+
+    def setName(self, name):
+        self.nodeData.name = name
+
+    def setClassName(self, className):
+        self.nodeData.className = className
+        self.nodeGraphic.updateTitle(className)
 
     @property
     def index(self):
@@ -89,6 +99,9 @@ class AbstractNodeInterface:
     @property
     def title(self):
         return self.nodeData.getTitle()
+
+    def setPos(self, pos):
+        self.nodeGraphic.setPos(pos)
 
     def initGraphics(self):
         self.nodeGraphic.createTitle()
@@ -141,6 +154,36 @@ class AbstractNodeInterface:
 
     # ###############################################
     #
+    #      THIS FUNCTION IS FOR UPDATE THE VALUE
+    #               IN THE GRAPHIC NODE
+
+    def updateInPlugValueFromGraphics(self, value):
+        """
+        ITA:
+            ...
+        ENG:
+            ...
+        :param value:
+        :return:
+        """
+        if self.nodeData.inPlugs[0].valueType == int:
+            try:
+                value = int(value)
+                self.changeInputValue(0, value)
+            except ValueError:
+                print("ValueError: the value is not an integer")
+        elif self.nodeData.inPlugs[0].valueType == float:
+            try:
+                value = float(value)
+                self.changeInputValue(0, value)
+            except ValueError:
+                print("ValueError: the value is not a float")
+        else:
+            self.changeInputValue(0, value)
+        self.nodeGraphic.updateTxtValuePosition()
+
+    # ###############################################
+    #
     #      THIS FUNCTION IS FOR CONNECTIONS
     #
 
@@ -152,15 +195,8 @@ class AbstractNodeInterface:
     def outConnections(self):
         return self.nodeData.outConnections
 
-    def setName(self, name):
-        self.nodeData.name = name
-
-    def setClassName(self, className):
-        self.nodeData.className = className
-        self.nodeGraphic.updateTitle(className)
-
-    def setPos(self, pos):
-        self.nodeGraphic.setPos(pos)
+    def disconnect(self, node, index):
+        self.nodeData.disconnect(node, index)
 
     # ###############################################
     #
@@ -193,7 +229,7 @@ class AbstractNodeInterface:
         :param plugIndex:
         :return:
         """
-        return self.nodeData.inPlugs[plugIndex].getValue()
+        raise NotImplementedError
 
     # ###############################################
     #
@@ -210,6 +246,7 @@ class AbstractNodeInterface:
             Change the value of an input plug.
             This function is called when an input plug is modified during
             the initialization of the node or when an output plug is recalculated.
+        :param isAResetValue: if True, the value is a reset value, comes handy when you want disconnect the node
         :param plugIndex:
         :param value:
         :return:
@@ -248,15 +285,49 @@ class AbstractNodeInterface:
             self.nodeGraphic.outPlugs.append(gPlug)
         self.nodeGraphic.updatePlugsPos()
 
-    def addInPlug(self, plug):
+    def addInPlug(self, name=None):
+        plug = PlugData("In", len(self.nodeData.inPlugs))
         self.nodeData.inPlugs.append(plug)
+        gPlug = plug.createPlugGraphic(self.nodeGraphic)
+        if name:
+            plug.setName(name)
+        self.nodeGraphic.inPlugs.append(gPlug)
+        self.nodeGraphic.updatePlugsPos()
+
+    def addInPlugs(self, number, nameList=None):
+        for x in range(number):
+            plug = PlugData("In", x)
+            self.nodeData.inPlugs.append(plug)
+            gPlug = plug.createPlugGraphic(self.nodeGraphic)
+            if nameList:
+                plug.setName(nameList[x])
+            self.nodeGraphic.inPlugs.append(gPlug)
+        self.nodeGraphic.updatePlugsPos()
 
     def addOutPlug(self, plug):
         self.nodeData.outPlugs.append(plug)
 
-    def deleteInPlug(self, index):
-        if len(self.nodeData.inPlugs) > 1:
-            self.nodeData.inPlugs.pop(index)
+    def deleteInPlug(self):
+        """
+        ITA:
+            Elimina l'ultimo plug di input. This is for preventing index out of range error
+        ENG:
+            Delete the last input plug
+        :param index:
+        :return:
+        """
+        index = len(self.nodeData.inPlugs) - 1
+        if index > 0:
+            try:
+                if self.nodeData.inPlugs[index].inConnection:
+                    connection = self.nodeData.inPlugs[index].inConnection
+                    self.canvas.deleteConnection(connection)
+                self.canvas.graphicScene.removeItem(self.inPlugs[-1].plugGraphic)
+                self.nodeData.deleteInPlug(-1)
+                self.nodeGraphic.deleteInPlug(-1)
+                self.nodeGraphic.updatePlugsPos()
+            except Exception as e:
+                print(f"Debug: index was {index} class AbstractNodeInterface, function deleteInPlug, error: {e}")
 
     def deleteOutPlug(self, index):
         if len(self.nodeData.outPlugs) > 1:
@@ -274,5 +345,21 @@ class AbstractNodeInterface:
         :param position:
         :return:
         """
-        self.contextMenu.exec(position)
-        print(f"Debug from class {self.className} function showContextMenu {position}")
+        pass
+
+    def serialize(self):
+        connections = []
+        for connection in self.nodeData.outConnections:
+            connections.append(connection.serialize())
+        value = self.nodeData.inPlugs[0].getValue()[0]
+        dicts = OrderedDict([
+            ('className', self.className),
+            ('title', self.title),
+            ('index', self.index),
+            ('value', value),
+            ('pos', (int(self.nodeGraphic.pos().x()), int(self.nodeGraphic.pos().y()))),
+            ('inPlugsNumb', len(self.inPlugs)),
+            ('outPlugsNumb', len(self.outPlugs)),
+            ('connections', connections)
+        ])
+        return json.dumps(dicts, indent=4)

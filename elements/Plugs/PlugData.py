@@ -17,10 +17,28 @@ class PlugData:
         return f"{self.getTitle}: {self.getValue()}"
 
     def setName(self, name):
+        """
+        ITA:
+            Questo metodo viene chiamato quando si modifica il nome del plug e aggiorna il testo nella grafica
+        ENG:
+            This method is called when the name of the plug is modified and updates the text in the graphics
+        :param name:
+        :return:
+        """
         self._name = name
         self.plugGraphic.updateTitle()
 
     def setNameFromGraphic(self, name):
+        """
+        ITA:
+            Questo metodo viene chiamato quando si modifica il nome del plug dalla finestra di dialogo
+            che compare quando si clicca con il tasto destro del mouse sul plug.
+        ENG:
+            This method is called when the name of the plug is modified from the dialog window
+            that appears when you right-click on the plug.
+        :param name:
+        :return:
+        """
         self._name = name
 
     def resetName(self):
@@ -33,9 +51,6 @@ class PlugData:
         return self._value
 
     def setValue(self, value):
-        print("Debug: class PlugData, function setValue, value: ", value)
-        if value == 10:
-            raise Exception
         self._value = value
         if self.plugGraphic:
             # aggiorna solo il valore basato sull'out[0]

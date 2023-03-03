@@ -228,7 +228,7 @@ class AbstractNodeGraphic(QGraphicsItem):
     def itemChange(self, change, value):
         if change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
             for connection in self.nodeInterface.outConnections:
-                connection.adjust()
+                connection.update()
         return QGraphicsItem.itemChange(self, change, value)
 
     def paint(self, painter, option, widget=None):
@@ -243,7 +243,7 @@ class AbstractNodeGraphic(QGraphicsItem):
         painter.drawRoundedRect(self.boundingRectangle, 5, 5)
 
     def contextMenuEvent(self, event):
-        self.contextMenu.exec(event.screenPos())
+        self.nodeInterface.showContextMenu(event.screenPos())
 
     # ##########################################
     #
@@ -342,7 +342,7 @@ class AbstractNodeGraphic(QGraphicsItem):
         self.txtTitle = SuperTxtTitle(self)
         self.txtTitle.installEventFilter(self.txtTitle)
         self.txtTitle.setTextInteractionFlags(Qt.TextInteractionFlag.TextEditorInteraction)
-        self.txtTitle.setPlainText(self.nodeInterface.title)
+        self.txtTitle.setPlainText(self.nodeData.getTitle())
         self.txtTitle.setDefaultTextColor(Qt.GlobalColor.white)
         self.txtTitle.setZValue(2)
         self.updateTitlePosition()

@@ -40,7 +40,7 @@ class PlugGraphic(QGraphicsItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
         self.boundingRectangle = QRectF(-self.diameter // 2, -self.diameter // 2, self.diameter * 2, self.diameter * 2)
-        self.setZValue(2)
+        self.setZValue(4)
         self.createTitleText()
 
     def __str__(self):
@@ -78,6 +78,9 @@ class PlugGraphic(QGraphicsItem):
     def updateTitle(self):
         self.txtTitle.setPlainText(self.title)
         self.defineTextPosition()
+
+    def center(self):
+        return self.mapToScene(self.boundingRect().center())
 
     def boundingRect(self):
         return self.boundingRectangle.normalized()

@@ -282,6 +282,11 @@ class GraphicViewOverride(QGraphicsView):
         self.checkIfInNodeIsConnected(item)
         # quindi connette i plug se è possibile connetterli
         connection = self.arrow.establishConnection(item)
+        if connection:
+            connection.outputNode.outConnect(connection)
+            connection.inputNode.inConnect(connection)
+            self.canvas.connections.append(connection)
+
 
 
     # #########################################

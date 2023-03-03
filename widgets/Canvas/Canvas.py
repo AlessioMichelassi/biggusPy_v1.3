@@ -66,7 +66,7 @@ class Canvas(QWidget):
         if action == _numberNode:
             self.addNodeByName("NumberNode")
         elif action == _stringNode:
-            self.addNodeByName("StringNode", value="Hello World")
+            self.addNodeByName("StringNode")
         elif action == _listNode:
             self.addNodeByName("ListNode", value=[1, 2, 3])
         elif action == _rangeNode:
@@ -106,6 +106,7 @@ class Canvas(QWidget):
 
     @staticmethod
     def createNode(className: str, *args, **kwargs):
+        # sourcery skip: use-named-expression
         """
         ITA:
             Crea un nodo a partire dal nome della classe ad Es: "NumberNode".
@@ -126,8 +127,10 @@ class Canvas(QWidget):
         nodeInterface = AbstractNodeInterface()
         nodeClass = getattr(module, className)
         node = nodeClass(*args, **kwargs)
-        if className == "NumberNode":
-            node.startValue = kwargs.get("value", node.startValue)  # Aggiorna il valore di partenza del nodo
+        value = kwargs.get("value", node.startValue)
+        if value:
+            node.startValue = value
+
         return node
 
     def addNode(self, node):
