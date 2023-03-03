@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from elements.Nodes.AbstractClass.AbstractNodeDataV1_2 import AbstractNodeData
 from elements.Nodes.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
 from elements.Plugs.PlugData import PlugData
