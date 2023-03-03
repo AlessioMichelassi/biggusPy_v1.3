@@ -116,12 +116,6 @@ class SetNode(AbstractNodeInterface):
             # se non è possibile convertire un elemento in un numero, restituisci il set come set di stringhe
             return {x.strip() for x in input_set}
 
-    def removeAllUnnecessaryPlugs(self):
-        if len(self.inPlugs) > 1:
-            for _ in range(1, len(self.inPlugs)):
-                self.deleteInPlug()
-            self.redesign()
-
     def doAdd(self):
         self.removeAllUnnecessaryPlugs()
         self.addInPlug("add")

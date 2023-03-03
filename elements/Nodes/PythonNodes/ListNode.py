@@ -218,4 +218,5 @@ class ListNode(AbstractNodeInterface):
         self.menuReturnValue = "reset"
         self.changeInputValue(0, self.startValue)
         self.updateAll()
+
         
