@@ -189,6 +189,9 @@ class AbstractNodeGraphic(QGraphicsItem):
     txtValue: SuperQLineEdit
     txtValueProxy: QGraphicsProxyWidget
 
+    proxyWidget: QGraphicsProxyWidget
+    isTxtValueProxied: bool = False
+
     contextMenu: QMenu
 
     # NodeGraphic colors
@@ -418,11 +421,23 @@ class AbstractNodeGraphic(QGraphicsItem):
             such as square brackets and commas, so if the width is greater
         :return:
         """
-        size = self.txtValue.sizeHint()
-        newSize = QSize(size.width() * 2, size.height())
-        self.txtValue.resize(newSize)
+        size = self.txtValue.size()
+        # la dimensione della QLineEdit non riesce a contenere il testo, quindi la si ingrandisce
+        # conta il numero di caratteri ad esclusione delle parentesi, delle virgole e degli apici
+        #
+        # the size of the QLineEdit cannot contain the text, so it is enlarged
+        # count the number of characters excluding parentheses, commas and apostrophes
+        charset_normalizer = "[]',"
+        charsCount = len(self.txtValue.text()) - sum(
+            self.txtValue.text().count(char) for char in charset_normalizer
+        )
+        if charsCount > 0:
+            size.setWidth(size.width() + charsCount * 2)
+
         if self.txtValue.width() > self.width * 2 - 40:
-            self.txtValue.resize(self.width - 40, self.txtValue.height())
+            size.setWidth(self.width * 2 - 40)
+        self.txtValue.setMinimumWidth(size.width())
+        self.txtValue.setMaximumWidth(size.width())
         x = (self.width - self.txtValue.width()) // 2
         y = self.height - (self.txtValue.height() * 1.2)
         self.txtValueProxy.setPos(x, y)
@@ -465,3 +480,14 @@ class AbstractNodeGraphic(QGraphicsItem):
             for plug in plugReference:
                 plug.setPos(QPointF(x, y))
                 y += plug.diameter * 3
+
+    # ##########################################
+    #
+    #                PROXY WIDGET SECTION
+    #
+
+    def createProxyWidget(self, widget):
+        self.proxyWidget = QGraphicsProxyWidget(self)
+        self.proxyWidget.setZValue(2)
+        self.proxyWidget.setWidget(widget)
+        self.txtValueProxy.hide()

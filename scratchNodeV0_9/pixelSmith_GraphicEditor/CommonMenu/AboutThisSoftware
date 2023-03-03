@@ -1,0 +1,35 @@
+ITA:
+    Questo programma è stato creato per sviluppare in modo più rapito e intuitivo nodo grafici per biggusPy.
+La parte grafica è stata sviluppata con PyQt5, mentre la parte logica è stata sviluppata con Python 3.8.2.
+
+    La finestra principale è composta da due programmi PixelSmit e ArguePy. Il primo serve per rifinire l'aspetto
+grafico del nodo mentre il secondo serve per scrivere il codice che verrà eseguito nel programma.
+
+    Ogni nodo deve avere almeno un input e un output. Il Risultato dell'output viene calcolato con il metodo
+calculateOutput(plugIndex) che viene chiamato ogni volta che viene modificato un input.
+
+Quindi per far si che il nodo funzioni, bisogna scrivere un codice all'interno di questa funzione:
+
+    def calculateOutput(self, plugIndex):
+        if plugIndex == 0:
+            value =  self.inPlugs[0].getValue() + self.inPlugs[1].getValue()
+            self.outPlugs[plugIndex].setValue(value)
+            return self.outPlugs[plugIndex].getValue()
+
+    In questo esempio il nodo ha due input e un output. Il nodo prende il valore dei due input, li somma e li
+restituisce come output.
+
+    Il nodo può avere anche più di un output. In questo caso bisogna scrivere un codice per ogni output:
+
+    def calculateOutput(self, plugIndex):
+        if plugIndex == 0:
+            value =  self.inPlugs[0].getValue() + self.inPlugs[1].getValue()
+            self.outPlugs[plugIndex].setValue(value)
+            return self.outPlugs[plugIndex].getValue()
+        elif plugIndex == 1:
+            value =  self.inPlugs[0].getValue() - self.inPlugs[1].getValue()
+            self.outPlugs[plugIndex].setValue(value)
+            return self.outPlugs[plugIndex].getValue()
+
+    In questo esempio il nodo ha due input e due output. Il nodo prende il valore dei due input, li somma e li
+restituisce come output. Il nodo prende il valore dei due input, li sottrae e li restituisce come output.

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p>ScratchNode is a program created to develop graphical nodes for BiggusPy in a more intuitive and efficient way. The GUI was developed using PyQt5, while the logic was implemented in Python 3.8.2.</p>
+<p>The main window consists of two programs, PixelSmit and ArguePy. The former is used to refine the graphical aspect of the node, while the latter is used to write the code that will be executed in the program.</p>
+<p>Each node must have at least one input and one output. The output result is calculated using the <code>calculateOutput(plugIndex)</code> method, which is called every time an input is modified.</p>
+<p>To make the node work, you need to write the code within this function:</p>
+<pre><code>def calculateOutput(self, plugIndex):
+    if plugIndex == 0:
+        value =  self.inPlugs[0].getValue() + self.inPlugs[1].getValue()
+        self.outPlugs[plugIndex].setValue(value)
+        return self.outPlugs[plugIndex].getValue()
+</code></pre>
+<p>In this example, the node has two inputs and one output. The node takes the value of the two inputs, adds them together, and returns them as the output.</p>
+
+</body>
+</html>

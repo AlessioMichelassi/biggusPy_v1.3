@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from elements.Connections.Arrow import Arrow
+from elements.Connections.Connection import Connection
 from elements.Nodes.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
 from elements.Plugs.PlugGraphic import PlugGraphic
 from widgets.NodeNameInputWidget import NodeNameInputWidget
@@ -269,6 +270,7 @@ class GraphicViewOverride(QGraphicsView):
                     self.graphicScene.removeItem(conn)
 
     def connectNode(self, item):
+        # sourcery skip: use-named-expression
         """
         ITA:
             Connette insieme due plug.
@@ -287,12 +289,19 @@ class GraphicViewOverride(QGraphicsView):
             connection.inputNode.inConnect(connection)
             self.canvas.connections.append(connection)
 
-
-
     # #########################################
     #
     #               Node Events
     #
+
+    def deleteSelectedItems(self):
+        for item in self.graphicScene.selectedItems():
+            if isinstance(item, AbstractNodeGraphic):
+                self.canvas.deleteNode(item.nodeInterface)
+            elif isinstance(item, Connection):
+                self.canvas.deleteConnection(item)
+            if item in self.graphicScene.items():
+                self.graphicScene.removeItem(item)
 
     def disableNode(self):
         for item in self.graphicScene.selectedItems():

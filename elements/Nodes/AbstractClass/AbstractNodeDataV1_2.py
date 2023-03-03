@@ -87,11 +87,7 @@ class AbstractNodeData:
         for plug in self.inPlugs:
             if plug.getValue() is None:
                 return False
-            if plug.getValue()[1] == _type:
-                valueReturn.append(True)
-            elif _type == int and plug.getValue()[1] == float:
-                valueReturn.append(True)
-            elif _type == float and plug.getValue()[1] == int:
+            if type(plug.getValue()) == _type:
                 valueReturn.append(True)
             else:
                 valueReturn.append(False)

@@ -68,7 +68,7 @@ class Canvas(QWidget):
         elif action == _stringNode:
             self.addNodeByName("StringNode")
         elif action == _listNode:
-            self.addNodeByName("ListNode", value=[1, 2, 3])
+            self.addNodeByName("ListNode")
         elif action == _rangeNode:
             self.addNodeByName("RangeNode")
         elif action == _mathNode:
@@ -76,7 +76,7 @@ class Canvas(QWidget):
         elif action == _ifNode:
             self.addNodeByName("IfNode")
         elif action == _forNode:
-            self.addNodeByName("ForNode", value=[1, 2, 3])
+            self.addNodeByName("ForNode")
         elif action == _functionNode:
             self.addNodeByName("FunctionNode")
         elif action == _booleanNode:
