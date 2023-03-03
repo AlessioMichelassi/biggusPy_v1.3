@@ -13,8 +13,8 @@ class BooleanNode(AbstractNodeInterface):
     menuReturnValue = "True"
     width = 70
     height = 60
-    colorTrain = [QColor(89, 17, 18),QColor(132, 0, 0),QColor(220, 78, 182),QColor(87, 48, 27),QColor(255, 255, 255),QColor(188, 64, 100),QColor(255, 33, 80),QColor(254, 130, 171),]
-
+    colorTrain = [QColor(89, 17, 18), QColor(132, 0, 0), QColor(220, 78, 182), QColor(87, 48, 27),
+                  QColor(255, 255, 255), QColor(188, 64, 100), QColor(255, 33, 80), QColor(254, 130, 171), ]
 
     def __init__(self, value: bool = True, inNum=1, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
