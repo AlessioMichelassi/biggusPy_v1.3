@@ -10,18 +10,31 @@ from scratchNodeV0_9.ArguePy_CodeEditor.arguePy import ArguePy
 
 
 class FunctionWidget(QWidget):
+    arguePy: ArguePy
+    lineEdit: QLineEdit
 
     def __init__(self, node, color: QColor, parent=None):
         super().__init__(parent)
         self.node: FunctionNode = node
-        self.arguePy = ArguePy()
-        self.lineEdit = QLineEdit()
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.arguePy)
-        self.layout.addWidget(self.lineEdit)
         self.setLayout(self.layout)
         self.startingColor = color
+        self.initWidget()
         self.setStyleX()
+
+    def initWidget(self):
+        self.arguePy = ArguePy()
+        self.lineEdit = QLineEdit()
+        frame = QFrame()
+        frame.setFrameStyle(QFrame.Shape.StyledPanel)
+        frame.setStyleSheet("background-color: rgb(50, 50, 50);"
+                            "border: 1px solid rgb(20, 20, 20);"
+                            "border-radius: 5px;")
+        frame.setContentsMargins(2, 2, 2, 2)
+        frame.setLayout(QVBoxLayout())
+        frame.layout().addWidget(self.arguePy)
+        frame.layout().addWidget(self.lineEdit)
+        self.layout.addWidget(frame)
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         contextMenu = QMenu(self)
@@ -73,9 +86,6 @@ class FunctionWidget(QWidget):
                                        border-color: {borderColor};"
             f"font-family: Arial;font-style: normal;font-size: 10pt;"
         )
-
-
-# FunctionNode deve cambiare in modo da ereditare da AbstractNodeInterface
 
 
 class FunctionNode(AbstractNodeInterface):
@@ -137,12 +147,10 @@ class FunctionNode(AbstractNodeInterface):
             nameList = []
             for i in range(num_args - inPlugsNumber):
                 nameList.append(f"arg{str(i)}")
-                self.addInPlug(num_args - inPlugsNumber, name=f"arg{str(i)}")
-
+                self.addInPlug(num_args - inPlugsNumber)
         elif num_args < len(self.inPlugs):
             for _ in range(len(self.inPlugs) - num_args):
                 self.deleteInPlug()
-
         self.updateInPlugNameByArgumentName([arg.arg for arg in function.args.args])
 
     def updateInPlugNameByArgumentName(self, argumentNameList):

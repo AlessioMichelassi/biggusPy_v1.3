@@ -285,6 +285,12 @@ class AbstractNodeInterface:
             self.nodeGraphic.outPlugs.append(gPlug)
         self.nodeGraphic.updatePlugsPos()
 
+    def setPlugInTitle(self, plugIndex, name):
+        self.nodeData.inPlugs[plugIndex].setName(name)
+
+    def setPlugOutTitle(self, plugIndex, name):
+        self.nodeData.outPlugs[plugIndex].setName(name)
+
     def addInPlug(self, name=None):
         plug = PlugData("In", len(self.nodeData.inPlugs))
         self.nodeData.inPlugs.append(plug)

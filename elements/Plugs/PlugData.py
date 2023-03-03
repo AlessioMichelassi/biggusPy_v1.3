@@ -27,6 +27,7 @@ class PlugData:
         """
         self._name = name
         self.plugGraphic.updateTitle()
+        print(f"Plug {self.getTitle()} renamed to {name}!")
 
     def setNameFromGraphic(self, name):
         """
