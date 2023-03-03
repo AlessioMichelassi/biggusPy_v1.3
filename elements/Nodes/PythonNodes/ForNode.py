@@ -41,40 +41,4 @@ class ForNode(AbstractNodeInterface):
     def createFunction(_function):
         return _function if callable(_function) else (lambda x: x)
 
-    def showContextMenu(self, position):
-        contextMenu = QMenu()
-        contextMenu.addSection("set value")
-        actionRandomInt = contextMenu.addAction("random int")
-        actionRandomFloat = contextMenu.addAction("random float")
-        actionPI = contextMenu.addAction("pi")
-        actionEuler = contextMenu.addAction("euler")
 
-        action = contextMenu.exec(position)
-        if action == actionRandomInt:
-            self.randomInt()
-        elif action == actionRandomFloat:
-            self.randomFloat()
-        elif action == actionPI:
-            self.pi()
-        elif action == actionEuler:
-            self.euler()
-
-    def randomInt(self):
-        value = random.randint(1, 99)
-        self.changeInputValue(0, value, True)
-        self.updateAll()
-
-    def randomFloat(self):
-        value = random.uniform(1.0, 99.0)
-        self.changeInputValue(0, value, True)
-        self.updateAll()
-
-    def pi(self):
-        value = math.pi
-        self.changeInputValue(0, value, True)
-        self.updateAll()
-
-    def euler(self):
-        value = math.e
-        self.changeInputValue(0, value, True)
-        self.updateAll()

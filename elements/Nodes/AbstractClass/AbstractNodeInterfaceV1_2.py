@@ -339,6 +339,11 @@ class AbstractNodeInterface:
         if len(self.nodeData.outPlugs) > 1:
             self.nodeData.outPlugs.pop(index)
 
+    def removeAllUnnecessaryPlugs(self):
+        for _ in range(1, len(self.inPlugs)):
+            self.deleteInPlug()
+        self.updateAll()
+
     # ###############################################
     #
     #               CONTEXT MENU

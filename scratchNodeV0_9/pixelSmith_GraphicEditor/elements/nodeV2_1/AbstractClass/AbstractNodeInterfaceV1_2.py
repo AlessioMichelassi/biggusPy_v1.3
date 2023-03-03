@@ -190,6 +190,8 @@ class AbstractNodeInterface:
         if len(self.nodeData.outPlugs) > 1:
             self.nodeData.outPlugs.pop(index)
 
+
+
     # ###############################################
     #
     #               CONTEXT MENU

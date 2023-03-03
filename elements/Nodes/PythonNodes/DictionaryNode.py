@@ -9,13 +9,12 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 
 class DictionaryNode(AbstractNodeInterface):
-
     menuReturnValue = "reset"
     startValue = {"a": 1, "b": 2, "c": 3}
     width = 120
     height = 80
-    colorTrain = [QColor(102, 92, 115),QColor(68, 61, 77),QColor(133, 120, 149),QColor(153, 138, 172),QColor(184, 166, 207),QColor(3, 2, 3),QColor(68, 61, 77),QColor(133, 120, 149),]
-
+    colorTrain = [QColor(102, 92, 115), QColor(68, 61, 77), QColor(133, 120, 149), QColor(153, 138, 172),
+                  QColor(184, 166, 207), QColor(3, 2, 3), QColor(68, 61, 77), QColor(133, 120, 149), ]
 
     def __init__(self, value: dict = None, inNum=1, outNum=1, parent=None):
         if value is None:

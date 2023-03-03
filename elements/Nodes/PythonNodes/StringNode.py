@@ -86,11 +86,6 @@ class StringNode(AbstractNodeInterface):
         else:
             self.nodeData.calculate()
 
-    def removeAllUnnecessaryPlugs(self):
-        for _ in range(1, len(self.inPlugs)):
-            self.deleteInPlug()
-        self.updateAll()
-
     def string(self):
         self.valueType = str
         self.setGraphicTitleText("StringNode")
