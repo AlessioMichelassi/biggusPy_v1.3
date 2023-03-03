@@ -2,6 +2,53 @@ from elements.Nodes.AbstractClass.AbstractNodeDataV1_2 import AbstractNodeData
 from elements.Nodes.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
 from elements.Plugs.PlugData import PlugData
 
+"""
+ITA:
+Un nodo è composto da:
+- un oggetto che rappresenta il nodo nel grafico
+- un oggetto che rappresenta il nodo nel codice
+- un'interfaccia che permette di comunicare tra il nodo nel grafico e il nodo nel codice
+
+ENG:
+A node consists of:
+- an object that represents the node in the graphic
+- an object that represents the node in the code
+- an interface that allows communication between the node in the graphic and the node in the code
+
+                    nodeInterface
+                    |            \
+                    |             \
+                nodeGraphic     nodeData
+
+ITA:
+Di per se un nodo non fa niente di particolare, a parte prendere un valore in ingresso
+ e restituirlo in uscita.
+
+Il nodo può essere modificato in modo da fare qualcosa di particolare, per esempio
+un nodo che somma due numeri, o un nodo che moltiplica due numeri, o un nodo che
+fa una media di due numeri, etc etc.
+
+Per farlo si può creare una classe che eredita abstractNodeInterface, e che implementa
+il metodo calculateOutput(plugIndex).
+
+Inoltre è possibile cambiare il numero di Input, il numero di output, il colore del nodo,
+la dimensione del nodo, etc etc.
+
+ENG:
+In itself a node does nothing special, except take a value as input
+and return it as output.
+
+The node can be modified to do something special, for example
+a node that adds two numbers, or a node that multiplies two numbers, or a node that
+does an average of two numbers, etc etc.
+
+To do this you can create a class that inherits abstractNodeInterface, and that implements
+the calculateOutput (plugIndex) method.
+
+In addition, it is possible to change the number of Input, the number of output, the color of the node,
+the size of the node, etc etc.
+"""
+
 
 class AbstractNodeInterface:
     colorTrain = []
