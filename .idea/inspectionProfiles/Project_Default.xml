@@ -1,0 +1,68 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N802" />
+          <option value="N803" />
+          <option value="N801" />
+          <option value="N806" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="PyQt6.QtWidgets.editingFinished.connect" />
+          <option value="PyQt6.QtWidgets.clicked.connect" />
+          <option value="object.__int__" />
+          <option value="PyQt5.QtWidgets.QGraphicsItem.name" />
+          <option value="PyQt5.QtWidgets.QGraphicsItem.value" />
+          <option value="PyQt5.QtWidgets.QGraphicsItem.setValue" />
+          <option value="PyQt5.QtWidgets.textChanged.connect" />
+          <option value="PyQt5.QtWidgets.QGraphicsItem.inPlugs" />
+          <option value="PyQt5.QtWidgets.QGraphicsItem.outPlugs" />
+          <option value="PyQt5.QtWidgets.QGraphicsItem.dataNode" />
+          <option value="PyQt5.QtWidgets.triggered.connect" />
+          <option value="PyQt5.QtWidgets.QGraphicsItem.nodeData" />
+          <option value="PyQt5.QtWidgets.clicked.connect" />
+          <option value="PyQt5.QtWidgets.returnPressed.connect" />
+          <option value="PyQt5.QtWidgets.QGraphicsView.QGraphicsView.DragMode" />
+          <option value="PyQt5.QtWidgets.QGraphicsView.QGraphicsView.ViewportAnchor" />
+          <option value="PyQt5.QtWidgets.QGraphicsView.QGraphicsView.ViewportUpdateMode" />
+          <option value="list.__getitem__" />
+          <option value="_ast.expr.id" />
+          <option value="PyQt5.QtCore.QObject.setWindowTitle" />
+          <option value="PyQt5.QtWidgets.QGraphicsView.scenePosChanged" />
+          <option value="PyQt5.QtWidgets.QGraphicsView.QGraphicsView.scenePosChanged" />
+          <option value="PyQt5.QtWidgets.blockCountChanged.connect" />
+          <option value="PyQt5.QtWidgets.updateRequest.connect" />
+          <option value="PyQt5.QtCore.QObject.height" />
+          <option value="PyQt5.QtCore.QObject.verticalScrollBar" />
+          <option value="minimalExample.minimalExample.gRoundedRect.updateControlPos" />
+          <option value="PyQt5.QtWidgets.valueChanged.connect" />
+          <option value="PyQt5.QtCore.QObject.hide" />
+          <option value="PyQt5.QtWidgets.currentColorChanged.connect" />
+          <option value="mainWin.menuBar.MenuBar.codeEditor" />
+          <option value="scintilla.colorWidget.isChecked" />
+          <option value="PyQt5.QtWidgets.QWidget.setChecked" />
+          <option value="PyQt5.QtCore.timeout.connect" />
+          <option value="PyQt5.QtWidgets.tabCloseRequested.connect" />
+          <option value="PyQt5.QtWidgets.tabBarDoubleClicked.connect" />
+          <option value="PyQt5.QtWidgets.currentChanged.connect" />
+          <option value="PyQt5.QtWidgets.toggled.connect" />
+          <option value="PyQt5.QtCore.QObject.isChecked" />
+          <option value="PyQt5.QtCore.QObject.setStyleSheet" />
+          <option value="PyQt5.QtWidgets.QColorDialog.getTriadColors" />
+          <option value="PyQt5.QtCore.QObject.palette" />
+          <option value="PyQt5.QtCore.QCoreApplication.setOverrideCursor" />
+          <option value="PyQt5.QtCore.QObject.size" />
+          <option value="PyQt5.QtCore.QObject.isVisible" />
+          <option value="sys._getframe" />
+          <option value="PyQt5.QtWidgets.sliderReleased.connect" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
