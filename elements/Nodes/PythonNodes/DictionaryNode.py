@@ -17,14 +17,14 @@ class DictionaryNode(AbstractNodeInterface):
                   QColor(184, 166, 207), QColor(3, 2, 3), QColor(68, 61, 77), QColor(133, 120, 149), ]
 
     def __init__(self, value: dict = None, inNum=1, outNum=1, parent=None):
-        if value is None:
-            value = self.startValue
         super().__init__(value, inNum, outNum, parent)
         self.setClassName("DictionaryNode")
         self.setName("DictionaryNode")
         self.changeSize(self.width, self.height)
         if value is not None:
             self.startValue = value
+        else:
+            value = self.startValue
         self.changeInputValue(0, value, True)
 
     def calculateOutput(self, plugIndex):

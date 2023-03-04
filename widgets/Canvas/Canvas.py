@@ -14,7 +14,7 @@ from elements.object.resizableRectangle import ResizableRectangle
 from graphicEngine.GraphicSceneOverride import GraphicSceneOverride
 from graphicEngine.graphicViewOverride import GraphicViewOverride
 
-from widgets.CodeToNodeWidget.codeToNode import CodeToNode
+from widgets.CodeToNodeWidget.codeToNode2 import CodeToNode
 
 
 class Canvas(QWidget):
@@ -113,24 +113,35 @@ class Canvas(QWidget):
         :param kwargs:  value, name, inputNumber, outputNumber etc...
         :return:
         """
+        module = None
+        nodeClass = None
         try:
             module = importlib.import_module(f"elements.Nodes.PythonNodes.{className}")
-            nodeInterface = AbstractNodeInterface()
-            nodeClass = getattr(module, className)
-            node = nodeClass(*args, **kwargs)
-            value = kwargs.get("value", node.startValue)
-            if value:
-                node.startValue = value
-
-            return node
         except Exception as e:
-            print(f"Error in createNode: {className} not found")
+            print(f"module not found: {className} not found {e}")
+        try:
+            if module:
+                nodeClass = getattr(module, className)
+        except Exception as e:
+            print(f"Error in nodeClass: {className} {e}")
+            return None
+        try:
+            if nodeClass:
+                node = nodeClass(*args, **kwargs)
+                value = kwargs.get("value", node.startValue)
+                if value:
+                    node.startValue = value
+                return node
+        except Exception as e:
+            print(f"Error in createNode: {className} {e}")
             return None
 
     def addNode(self, node):
         _node = self.updateTitle(node)
+        _node.updateTitle()
         self.nodesTitleList.append(_node.title)
         self.nodes.append(_node)
+
         self.graphicScene.addItem(_node.nodeGraphic)
 
     def addNodeByName(self, name, value=None):
@@ -173,6 +184,7 @@ class Canvas(QWidget):
         _connection = Connection(OutputNodeData, outputPlug, outputPlug.index, inputNodeData, inputPlug,
                                  inputPlug.index)
         _connection.outputNode.outConnect(_connection)
+        _connection.inputNode.inConnect(_connection)
         self.connections.append(_connection)
         self.graphicScene.addItem(_connection)
 
@@ -193,6 +205,7 @@ class Canvas(QWidget):
         for node in self.nodes:
             if node.title == title:
                 return node
+        print(f"node title: {title} not found")
         return None
 
     def cleanTheScene(self):
@@ -218,6 +231,24 @@ class Canvas(QWidget):
 
     # ------------------ FROM CODE TO NODE ------------------
 
+    def getNodeByName(self, name):
+        """
+        ITA:
+            E' un metodo pericoloso, se due nodi hanno lo stesso nome, ritorna il primo che trova
+            però può essere usato quando si sta facendo il codeToNode e si sa che non ci sono
+            due nodi con lo stesso nome oppure ci si riferisce sempre alla stessa variabile.
+        ENG:
+            It is a dangerous method, if two nodes have the same name, it returns the first one it finds
+            but it can be used when doing codeToNode and you know that there are not
+            two nodes with the same name or you always refer to the same variable.
+        :param name:
+        :return:
+        """
+        for node in self.nodes:
+            if node.nodeData.name == name:
+                return node
+        return None
+
     def createNodeFromCode(self):
         """
         This method create a list of nodes from a code
@@ -225,7 +256,6 @@ class Canvas(QWidget):
         :return: list of nodes
         """
         # test codeToNode
-        print("aaaa")
         codeToNode = CodeToNode(self)
         code2 = '''def SieveOfEratosthenes(n):
                                 prime_list = []
@@ -234,11 +264,40 @@ class Canvas(QWidget):
                                         print (i)
                                         for j in range(i*i, n+1, i):
                                             prime_list.append(j)'''
-        code = """a = 30\nb = 20\nc = [1,2,3,4,5,6]"""
-        codeToNode.createNodeFromCode(code)
-        for node in codeToNode.nodes:
-            print(node)
+        code3 = """a = 30\nb = 20\nc = [1,2,3,4,5,6]"""
+        code4 = """a= 30\nb= 20\nc= a - b"""
+        codeTuple = """tuple1 = ("apple", "banana", "cherry")\ntuple2 = (1, 5, 7, 9, 3)\ntuple3 = (True, False, 
+        False)"""
+        codeList = """c = [1,2,3,4,5,6]\nlist1 = ["apple", "banana", "cherry"]"""
+        codeSet = """set1 = {"apple", "banana", "cherry"}\nset2 = {1, 5, 7, 9, 3}"""
+        codeDict = """dict1 = {"brand": "Ford","model": "Mustang","year": 1964}"""
+        # in questo caso non funziona perchè + deve diventare string concat e non mathNode
+        codeString = """a = "Hello, World!"\nb = "Hello, World!"\nc = a + b"""
+        codeIf = """a = 33\nb = 200\nif b > a:\n  print("b is greater than a")"""
+        code = f"""{codeTuple}\n{codeList}\n{codeSet}\n{codeDict}"""
+        codeToNode.createNodeFromCode(code4)
+        self.graphicView.selectAllCenterSceneAndDeselect()
+
+    def createNodeFromCodeToNode(self, className, *args, **kwargs):
+        """
+        This method create a node from a codeToNode
+        :param className: name of the class
+        :param args: args of the class
+        :param kwargs: kwargs of the class
+        :return: node created
+        """
+        node = self.createNode(className, *args, **kwargs)
+        if node:
             self.addNode(node)
+            node.setPos(self.graphicScene.currentMousePos)
+        return node
+
+    def updateNodePosition(self, node, x, y):
+        if node is not None:
+            nodeToUpdate = self.getNodeByTitle(node.title)
+            nodeToUpdate.setPos(QPointF(x, y))
+        else:
+            print(f"node {node} not found")
 
     # ------------------ SERIALIZATION ------------------
 

@@ -88,3 +88,13 @@ class MathNode(AbstractNodeInterface):
         self.nodeGraphic.setTitle(title)
         self.setGraphicTitleText(title)
         self.updateInPlugValueFromGraphics(value)
+
+    def setOperator(self, operator):
+        self.menuReturnValue = operator
+        title = operator
+        self.setGraphicTitleText(title)
+        if self.nodeData.outConnections:
+            for connection in self.nodeData.outConnections:
+                connection.updateValue()
+        else:
+            self.nodeData.calculate()

@@ -18,8 +18,6 @@ class SetNode(AbstractNodeInterface):
                   QColor(184, 166, 207), QColor(3, 2, 3), QColor(68, 61, 77), QColor(133, 120, 149), ]
 
     def __init__(self, value: set[Union[int, float, str]] = None, inNum=1, outNum=1, parent=None):
-        if value is None:
-            value = self.startValue
         super().__init__(value, inNum, outNum, parent)
         self.setClassName("SetNode")
         self.setName("SetNode")
@@ -99,16 +97,18 @@ class SetNode(AbstractNodeInterface):
 
     @staticmethod
     def checkSet(value):
-        if isinstance(value, set):
-            return value
-        input_string = value.strip()
+        inputString = str(value)
+        print(inputString)
         # controlla se inizia con "{" e finisce con "}"
-        if input_string.startswith("{") and input_string.endswith("}"):
+        if inputString.startswith("{") and inputString.endswith("}"):
             # se sì, rimuovi "{" e "}" e splitta la stringa restante sulla base della virgola
-            input_set = input_string[1:-1].split(",")
+            input_set = inputString[1:-1].split(",")
+        elif inputString.startswith("[") and inputString.endswith("]"):
+            # se sì, rimuovi "[" e "]" e splitta la stringa restante sulla base della virgola
+            input_set = inputString[1:-1].split(",")
         else:
             # altrimenti, splitta la stringa sulla base della virgola
-            input_set = input_string.split(",")
+            input_set = inputString.split(",")
         # prova a convertire ciascun elemento del set in un numero (intero o decimale)
         try:
             return {int(x) if x.isdigit() else float(x) for x in input_set}

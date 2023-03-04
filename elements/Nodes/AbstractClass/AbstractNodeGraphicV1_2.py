@@ -225,6 +225,11 @@ class AbstractNodeGraphic(QGraphicsItem):
         self.isNodeCreated = True
         self.thread = None
 
+    def __str__(self):
+        return f"Node type: {self.nodeInterface.nodeData.className}" \
+               f" name: {self.nodeInterface.nodeData.name} index: {self.nodeInterface.nodeData.index}"\
+               f" title: {self.nodeInterface.nodeData.getTitle()}"
+
     def boundingRect(self):
         return self.boundingRectangle.normalized()
 

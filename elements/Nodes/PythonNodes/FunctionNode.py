@@ -89,7 +89,7 @@ class FunctionWidget(QWidget):
 
 
 class FunctionNode(AbstractNodeInterface):
-    startValue = "def default_function(arg1, arg2):\n    return arg1 + arg2"
+    startValue = "def default_function(operatorType, arg2):\n    return operatorType + arg2"
     functionString = startValue
     menuReturnValue = ""
     function = None

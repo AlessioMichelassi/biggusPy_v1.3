@@ -2,6 +2,8 @@
 import json
 from collections import OrderedDict
 
+from PyQt5.QtCore import QPointF
+
 from elements.Nodes.AbstractClass.AbstractNodeDataV1_2 import AbstractNodeData
 from elements.Nodes.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
 from elements.Plugs.PlugData import PlugData
@@ -81,6 +83,9 @@ class AbstractNodeInterface:
         self.nodeData.name = name
         self.nodeGraphic.updateTitle(name)
 
+    def getName(self):
+        return self.nodeData.name
+
     def setClassName(self, className):
         self.nodeData.className = className
         self.nodeGraphic.updateTitle(className)
@@ -104,6 +109,19 @@ class AbstractNodeInterface:
     def setPos(self, pos):
         self.nodeGraphic.setPos(pos)
 
+    def setPosXY(self, x, y):
+        point = QPointF(x, y)
+        self.nodeGraphic.setPos(point)
+
+    def getPos(self):
+        return self.nodeGraphic.pos()
+
+    def getWidth(self):
+        return self.nodeGraphic.width
+
+    def getHeight(self):
+        return self.nodeGraphic.height
+
     def initGraphics(self):
         self.nodeGraphic.createTitle()
         self.nodeGraphic.createTxtValue()
@@ -111,6 +129,11 @@ class AbstractNodeInterface:
         self.nodeGraphic.setLogo(pngFile)
         if self.colorTrain:
             self.setColorTrain(self.colorTrain)
+
+    def updateTitle(self):
+        title = self.nodeData.getTitle()
+        self.nodeGraphic.updateTitle(title)
+        self.nodeGraphic.updateTitlePosition()
 
     def setGraphicTitleText(self, title):
         self.nodeGraphic.updateTitle(title)
