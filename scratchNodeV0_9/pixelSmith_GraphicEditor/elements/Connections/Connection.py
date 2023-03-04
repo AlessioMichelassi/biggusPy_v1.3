@@ -55,7 +55,7 @@ class Connection(QGraphicsItem):
             self.outputNode.outConnections.remove(self)
 
         resetValue = self.inputNode.inPlugs[self.inIndex].resetValue
-        self.inputNode.inPlugs[self.inIndex].setValue(resetValue, type(resetValue), resetValue)
+        self.inputNode.inPlugs[self.inIndex].setValue(resetValue)
         self.inputNode.calculate()
         if self.inputNode.outConnections:
             for connection in self.inputNode.outConnections:

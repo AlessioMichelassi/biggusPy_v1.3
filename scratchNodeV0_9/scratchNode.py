@@ -8,9 +8,9 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeInterface
 from scratchNodeV0_9.pixelSmith_GraphicEditor.CommonMenu.graphicEditorMenuBar import MenuBar
-from scratchNodeV0_9.pixelSmith_GraphicEditor.elements.nodeV2_1.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
-from scratchNodeV0_9.pixelSmith_GraphicEditor.elements.nodeV2_1.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeInterface
+
 from scratchNodeV0_9.pixelSmith_GraphicEditor.pixelSmith import pixelSmith
 from scratchNodeV0_9.ArguePy_CodeEditor.arguePy import ArguePy
 
@@ -257,10 +257,16 @@ class scratchNodeV0_9(QMainWindow):
         """
         code = self.codeEditor.codeEditor.toPlainText()
         mod = types.ModuleType("DefaultNode")
-        exec(code, mod.__dict__)
-        node = self.createNode("DefaultNode", mod, value=10)
-        self.graphicEditor.changeNode(node)
-        self.graphicEditor.graphicView.selectAllCenterSceneAndDeselect()
+        try:
+            exec(code, mod.__dict__)
+            node = self.createNode("DefaultNode", mod, value=10)
+            self.graphicEditor.changeNode(node)
+            self.graphicEditor.graphicView.selectAllCenterSceneAndDeselect()
+        except Exception as e:
+            print("WARNING CANNOT UPDATE NODE FROM TEXT")
+            print(e)
+            return
+
 
     # ################################################
     #

@@ -79,6 +79,7 @@ class AbstractNodeInterface:
 
     def setName(self, name):
         self.nodeData.name = name
+        self.nodeGraphic.updateTitle(name)
 
     def setClassName(self, className):
         self.nodeData.className = className

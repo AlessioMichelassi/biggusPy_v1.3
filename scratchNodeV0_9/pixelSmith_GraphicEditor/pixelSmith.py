@@ -1,8 +1,8 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from graphicEngine.graphicViewOverride import GraphicViewOverride
 from scratchNodeV0_9.pixelSmith_GraphicEditor.GraphicEngine.graphicEditorGraphicSceneOverride import graphicEditor_GraphicSceneOverride
-from scratchNodeV0_9.pixelSmith_GraphicEditor.GraphicEngine.graphicEditorGraphicViewOverride import graphicEditor_GraphicViewOverride
 from scratchNodeV0_9.pixelSmith_GraphicEditor.Widgets.PropertyEditor.propertyEditor import nodePropertyEditor
 from scratchNodeV0_9.pixelSmith_GraphicEditor.Widgets.colorSmith.colorToolsWidget import colorToolsWidget
 
@@ -13,7 +13,7 @@ class pixelSmith(QWidget):
     propertyEditor: nodePropertyEditor
 
     graphicScene: graphicEditor_GraphicSceneOverride
-    graphicView: graphicEditor_GraphicViewOverride
+    graphicView: GraphicViewOverride
     position = QPoint(0, 0)
 
     # scene variables
@@ -50,7 +50,7 @@ class pixelSmith(QWidget):
         :return:
         """
         self.graphicScene = graphicEditor_GraphicSceneOverride()
-        self.graphicView = graphicEditor_GraphicViewOverride(self.graphicScene)
+        self.graphicView = GraphicViewOverride(None, self.graphicScene)
         self.graphicScene.setGraphicScene(self.sceneWidth, self.sceneHeight)
         layout = QHBoxLayout()
         layout.addWidget(self.graphicView, 1, Qt.AlignmentFlag.AlignLeft)

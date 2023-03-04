@@ -6,7 +6,7 @@ from elements.Connections.Arrow import Arrow
 from elements.Connections.Connection import Connection
 from elements.Nodes.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
 from elements.Plugs.PlugGraphic import PlugGraphic
-from widgets.NodeNameInputWidget import NodeNameInputWidget
+from widgets.NodeFinderWidget import NodeFinderWidget
 
 
 class GraphicViewOverride(QGraphicsView):
@@ -334,7 +334,7 @@ class GraphicViewOverride(QGraphicsView):
         :return:
         """
         centerPoint = self.mapToScene(self.viewport().rect().center())
-        dialog = NodeNameInputWidget(self.canvas, self, centerPoint, self)
+        dialog = NodeFinderWidget(self.canvas, self, centerPoint, self)
         rect = self.canvas.geometry()
         _center = rect.center()
         x = _center.x()

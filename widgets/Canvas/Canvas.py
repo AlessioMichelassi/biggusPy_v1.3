@@ -58,7 +58,7 @@ class Canvas(QWidget):
         _functionNode = contextMenu.addAction("Function Node")
         _booleanNode = contextMenu.addAction("Boolean Node")
         _addClassNode = contextMenu.addAction("Add Class Node")
-        _nodeToCode = contextMenu.addAction("Node To Code")
+        _nodeToCode = contextMenu.addAction("codeToNode")
         action = contextMenu.exec(self.mapToGlobal(event.pos()))
 
         if action == actionCenterObject:
@@ -86,17 +86,7 @@ class Canvas(QWidget):
             self.graphicScene.addItem(rectangle)
             rectangle.setPos(self.mapToGlobal(event.pos()))
         elif action == _nodeToCode:
-            # test codeToNode
-            codeToNode = CodeToNode(self)
-            code2 = '''def SieveOfEratosthenes(n):
-                        prime_list = []
-                        for i in range(2, n+1):
-                            if i not in prime_list:
-                                print (i)
-                                for j in range(i*i, n+1, i):
-                                    prime_list.append(j)'''
-            code = """a = 30\nb = 20\nc = [1,2,3,4,5,6]"""
-            nodeList = codeToNode.createNodeFromCode(code)
+            self.createNodeFromCode()
 
     def __str__(self):
         returnNodes = ""
@@ -123,15 +113,19 @@ class Canvas(QWidget):
         :param kwargs:  value, name, inputNumber, outputNumber etc...
         :return:
         """
-        module = importlib.import_module(f"elements.Nodes.PythonNodes.{className}")
-        nodeInterface = AbstractNodeInterface()
-        nodeClass = getattr(module, className)
-        node = nodeClass(*args, **kwargs)
-        value = kwargs.get("value", node.startValue)
-        if value:
-            node.startValue = value
+        try:
+            module = importlib.import_module(f"elements.Nodes.PythonNodes.{className}")
+            nodeInterface = AbstractNodeInterface()
+            nodeClass = getattr(module, className)
+            node = nodeClass(*args, **kwargs)
+            value = kwargs.get("value", node.startValue)
+            if value:
+                node.startValue = value
 
-        return node
+            return node
+        except Exception as e:
+            print(f"Error in createNode: {className} not found")
+            return None
 
     def addNode(self, node):
         _node = self.updateTitle(node)
@@ -141,8 +135,9 @@ class Canvas(QWidget):
 
     def addNodeByName(self, name, value=None):
         node = self.createNode(name, value) if value else self.createNode(name)
-        self.addNode(node)
-        node.setPos(self.graphicScene.currentMousePos)
+        if node:
+            self.addNode(node)
+            node.setPos(self.graphicScene.currentMousePos)
 
     def createAndReturnNode(self, name, value=None):
         return self.createNode(name, value) if value else self.createNode(name)
@@ -220,6 +215,32 @@ class Canvas(QWidget):
                 self.addSerializedNode(node, currentPos)
         except Exception as e:
             print(e)
+
+    # ------------------ FROM CODE TO NODE ------------------
+
+    def createNodeFromCode(self):
+        """
+        This method create a list of nodes from a code
+        :param code: code to convert
+        :return: list of nodes
+        """
+        # test codeToNode
+        print("aaaa")
+        codeToNode = CodeToNode(self)
+        code2 = '''def SieveOfEratosthenes(n):
+                                prime_list = []
+                                for i in range(2, n+1):
+                                    if i not in prime_list:
+                                        print (i)
+                                        for j in range(i*i, n+1, i):
+                                            prime_list.append(j)'''
+        code = """a = 30\nb = 20\nc = [1,2,3,4,5,6]"""
+        codeToNode.createNodeFromCode(code)
+        for node in codeToNode.nodes:
+            print(node)
+            self.addNode(node)
+
+    # ------------------ SERIALIZATION ------------------
 
     def serialize(self):
         listOfNodeSerialized = []

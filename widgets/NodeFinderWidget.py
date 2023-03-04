@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 
-class NodeNameInputWidget(QWidget):
+class NodeFinderWidget(QWidget):
     def __init__(self, canvas, view, centerPoint, parent=None):
         super().__init__(parent)
         self.canvas = canvas

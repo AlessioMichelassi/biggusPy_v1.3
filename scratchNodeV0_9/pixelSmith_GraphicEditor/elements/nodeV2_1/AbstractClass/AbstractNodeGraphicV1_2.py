@@ -257,9 +257,8 @@ class AbstractNodeGraphic(QGraphicsItem):
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
-            self.sizeGrip.updateShape()
             for connection in self.nodeInterface.outConnections:
-                connection.adjust()
+                connection.update()
         return QGraphicsItem.itemChange(self, change, value)
 
     def paint(self, painter, option, widget=None):
