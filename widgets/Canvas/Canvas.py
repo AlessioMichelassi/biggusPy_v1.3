@@ -265,7 +265,7 @@ class Canvas(QWidget):
                                         for j in range(i*i, n+1, i):
                                             prime_list.append(j)'''
         code3 = """a = 30\nb = 20\nc = [1,2,3,4,5,6]"""
-        code4 = """a= 30\nb= 20\nc= a - b"""
+        code4 = """a= 30\nb= 20\nc= a + b"""
         codeTuple = """tuple1 = ("apple", "banana", "cherry")\ntuple2 = (1, 5, 7, 9, 3)\ntuple3 = (True, False, 
         False)"""
         codeList = """c = [1,2,3,4,5,6]\nlist1 = ["apple", "banana", "cherry"]"""

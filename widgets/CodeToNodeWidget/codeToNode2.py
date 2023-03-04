@@ -242,7 +242,7 @@ class CodeToNode:
         """
         if isinstance(value, ast.Add):
             return "+"
-        elif isinstance(value, ast.Sub):
+        elif isinstance(value, (ast.Sub, ast.Subtract)):
             return "-"
         elif isinstance(value, ast.Mult):
             return "*"
@@ -290,40 +290,49 @@ class CodeToNode:
         """
         assignmentVariable = self.returnBiggusPyNode("VariableNode", value, name)
         operator = self.returnOperator(value.op)
+        print(f"operator: {operator}")
         opNode = None
         left = value.left
         right = value.right
         opNode = self.searchWhichNodeToCreate(left, right, operator, value, name)
+        print(f"opNode: {str(opNode)}")
         self.checkIfLeftAndRightVariablesExist(left, right, opNode, assignmentVariable, name)
 
-    def searchWhichNodeToCreate(self, left, right, operator, value, name):
-        if isinstance(left, ast.Num) and isinstance(right, ast.Num):
-            opNode = self.returnBiggusPyNode("MathNode", value, name)
-            if opNode is not None:
-                opNode.setOperator(operator)
-        elif isinstance(left, ast.Str) and isinstance(right, ast.Str):
-            opNode = self.returnBiggusPyNode("StringNode", value, name)
-            if opNode is not None:
-                opNode.setOperator(operator)
-        elif isinstance(left, ast.List) and isinstance(right, ast.List):
-            opNode = self.returnBiggusPyNode("ListNode", value, name)
-            if opNode is not None:
-                opNode.setOperator(operator)
-        elif isinstance(left, ast.Tuple) and isinstance(right, ast.Tuple):
-            opNode = self.returnBiggusPyNode("TupleNode", value, name)
-            if opNode is not None:
-                opNode.setOperator(operator)
-        elif isinstance(left, ast.Set) and isinstance(right, ast.Set):
-            opNode = self.returnBiggusPyNode("SetNode", value, name)
-            if opNode is not None:
-                opNode.setOperator(operator)
-        elif isinstance(left, ast.Dict) and isinstance(right, ast.Dict):
-            opNode = self.returnBiggusPyNode("DictNode", value, name)
-            if opNode is not None:
-                opNode.setOperator(operator)
+    def returnType(self, value):
+        """
+        ITA:
+            Questo metodo ritorna il tipo di variabile.
+        ENG:
+            This method returns the type of variable.
+        :param value:
+        :return:
+        """
+        if isinstance(value, ast.Num):
+            return "Number"
+        elif isinstance(value, ast.Str):
+            return "String"
+        elif isinstance(value, ast.List):
+            return "List"
+        elif isinstance(value, ast.Tuple):
+            return "Tuple"
+        elif isinstance(value, ast.Set):
+            return "Set"
+        elif isinstance(value, ast.Dict):
+            return "Dict"
+        elif isinstance(value, ast.Name):
+            return "Variable"
         else:
-            opNode = None
-            print("WARNING: Node not created")
+            return None
+
+    def searchWhichNodeToCreate(self, left, right, operator, value, name):
+        leftType = self.returnType(left)
+        rightType = self.returnType(right)
+        print(f"leftType: {leftType}")
+        # crea l'op node dopo aver controllato se left e right esistono
+        # se esistono e il className di left è NumberNode crea il mathNode
+        # altrimenti crea una string etc etc... altrimenti crea un variableNode
+        # e ritorna un opNode che adesso andrà creato nella lista dei nodi!
+        opNode = None
         return opNode
 
     def checkIfLeftAndRightVariablesExist(self, left, right, opNode, assignmentVariable, name):
