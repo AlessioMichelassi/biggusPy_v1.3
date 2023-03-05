@@ -151,6 +151,7 @@ class CodeToNode:
             self.canvas.addNode(node)
             if self.lastNode is not None:
                 self.updateNodePositionByLastNode(node)
+            self.lastNode = node
             return node
         else:
             print("WARNING: Node not created")
@@ -174,6 +175,7 @@ class CodeToNode:
             self.canvas.addNode(node)
             if self.lastNode is not None:
                 self.updateNodePositionByLastNode(node)
+            self.lastNode = node
             return node
         else:
             print("WARNING: Node not created")
@@ -202,6 +204,7 @@ class CodeToNode:
             self.canvas.addNode(node)
             if self.lastNode is not None:
                 self.updateNodePositionByLastNode(node)
+            self.lastNode = node
             return node
         else:
             print("WARNING: Node not created")
@@ -332,7 +335,34 @@ class CodeToNode:
         # se esistono e il className di left è NumberNode crea il mathNode
         # altrimenti crea una string etc etc... altrimenti crea un variableNode
         # e ritorna un opNode che adesso andrà creato nella lista dei nodi!
+        arg1 = self.canvas.getNodeByName(left.id)
         opNode = None
+        if arg1 is not None:
+            if arg1.className == "NumberNode":
+                opNode = self.returnBiggusPyNode("MathNode", value, name)
+                opNode.operator = operator
+            elif arg1.className == "StringNode":
+                opNode = self.returnBiggusPyNode("StringNode", value, name)
+                opNode.operator = operator
+            elif arg1.className == "ListNode":
+                opNode = self.returnBiggusPyNode("ListNode", value, name)
+                opNode.operator = operator
+            elif arg1.className == "TupleNode":
+                opNode = self.returnBiggusPyNode("TupleNode", value, name)
+                opNode.operator = operator
+            elif arg1.className == "SetNode":
+                opNode = self.returnBiggusPyNode("SetNode", value, name)
+                opNode.operator = operator
+            elif arg1.className == "DictNode":
+                opNode = self.returnBiggusPyNode("DictNode", value, name)
+                opNode.operator = operator
+            elif arg1.className == "VariableNode":
+                opNode = self.returnBiggusPyNode("VariableNode", value, name)
+                opNode.operator = operator
+            else:
+                print("WARNING: leftType not found")
+                opNode = None
+            return opNode
         return opNode
 
     def checkIfLeftAndRightVariablesExist(self, left, right, opNode, assignmentVariable, name):
@@ -345,7 +375,9 @@ class CodeToNode:
             print("OpNode not created")
         elif assignmentVariable is not None:
             self.setOpNodePosition(arg1, arg2, opNode, assignmentVariable)
-            self.canvas.connectNodes(arg1, arg2, name)
+            self.createConnection(arg1, opNode)
+            self.createConnection(arg2, opNode)
+            self.createConnection(opNode, assignmentVariable)
         else:
             print("Assignment variable not created")
 
@@ -410,8 +442,17 @@ class CodeToNode:
         :param node:
         :return:
         """
-        if node is not None:
-            x = self.lastNode.getPos().x()
-            y = self.lastNode.getPos().y() + self.lastNode.getHeight() * 2
-            self.updateNodePosition(node, x, y)
-            self.lastNode = node
+        x = self.lastNode.getPos().x()
+        y = self.lastNode.getPos().y() + self.lastNode.getHeight() * 2
+        self.updateNodePosition(node, x, y)
+
+    # ------------------ NODE CONNECTION ------------------
+
+    def createConnection(self, node1, node2):
+        plugIndex = 0
+        for plug in node2.inPlugs:
+            if plug.inConnection is None:
+                break
+            plugIndex += 1
+        self.canvas.addConnection(node2, plugIndex, node1, 0)
+

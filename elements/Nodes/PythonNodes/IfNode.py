@@ -26,10 +26,6 @@ class IfNode(AbstractNodeInterface):
         self.changeInputValue(0, value, True)
         self.changeInputValue(1, value, True)
 
-    def calculate(self):
-        for i in range(len(self.outPlugs)):
-            self.calculateOutput(i)
-
     def calculateOutput(self, plugIndex):
         operations = {
             "==": self.compare,
