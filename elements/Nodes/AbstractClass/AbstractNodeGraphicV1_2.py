@@ -473,19 +473,48 @@ class AbstractNodeGraphic(QGraphicsItem):
         self.updatePlugPosition(self.outPlugs)
 
     def updatePlugPosition(self, plugReference):
-        x = -8
-        if "out" in plugReference[0].plugData.className.lower():
-            x = self.width - 2
-        if len(plugReference) == 1:
-            y = self.height // 2
-            plugReference[0].setPos(QPointF(x, y))
+        if "If" not in self.nodeData.className:
+            x = -8
+            if "out" in plugReference[0].plugData.className.lower():
+                x = self.width - 2
+            if len(plugReference) == 1:
+                y = self.height // 2
+                plugReference[0].setPos(QPointF(x, y))
+            else:
+                # Quello che fa è calcolare la distanza tra i vari plug
+                # in modo che siano sempre uguali
+                y = (self.height - (len(plugReference) * plugReference[0].diameter * 3)) // 2
+                for plug in plugReference:
+                    plug.setPos(QPointF(x, y))
+                    y += plug.diameter * 3
         else:
-            # Quello che fa è calcolare la distanza tra i vari plug
-            # in modo che siano sempre uguali
-            y = (self.height - (len(plugReference) * plugReference[0].diameter * 3)) // 2
-            for plug in plugReference:
+            self.updatePlugForIfNode(plugReference)
+
+    def updatePlugForIfNode(self, plugReference):
+        # se il nodo è un IfNode allora i plug devono essere disposti in modo diverso
+        # due In a sinistra, due in a destra e l'out in basso
+
+        # if the node is an IfNode then the plugs must be arranged differently
+        # two In on the left, two on the right and the out at the bottom
+        x = -8
+        y = self.height // 2 - plugReference[0].diameter * 3
+        for plug in plugReference[:2]:
+            if "out" not in plug.plugData.className.lower():
                 plug.setPos(QPointF(x, y))
                 y += plug.diameter * 3
+        y = self.height // 2 - plugReference[0].diameter * 3
+        for plug in plugReference[2:]:
+            if "out" not in plug.plugData.className.lower():
+                plug.isTxtReversed = True
+                plug.defineTextPosition()
+                plug.setPos(QPointF(self.width - 2, y))
+                y += plug.diameter * 3
+
+        for plug in plugReference:
+            if "out" in plug.plugData.className.lower():
+                plug.setPos(QPointF(self.width // 2, self.height + 8))
+
+
 
     # ##########################################
     #

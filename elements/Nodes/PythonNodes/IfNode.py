@@ -11,12 +11,12 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 class IfNode(AbstractNodeInterface):
     resetValue = True
     menuReturnValue = "=="
-    width = 120
-    height = 80
+    width = 100
+    height = 120
     colorTrain = [QColor(255, 255, 255), QColor(255, 0, 4), QColor(255, 246, 228), QColor(177, 202, 255),
                   QColor(255, 230, 177), QColor(52, 16, 38), QColor(255, 230, 177), QColor(255, 246, 228), ]
 
-    def __init__(self, value: bool = True, inNum=2, outNum=2, parent=None):
+    def __init__(self, value: bool = True, inNum=4, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
 
         self.menuReturnValue = "=="
@@ -27,22 +27,27 @@ class IfNode(AbstractNodeInterface):
         self.changeInputValue(1, value, True)
 
     def calculateOutput(self, plugIndex):
+        val1 = self.inPlugs[0].getValue()
+        val2 = self.inPlugs[1].getValue()
         operations = {
-            "==": self.compare,
-            "!=": self.different,
-            ">": self.greater,
-            "<": self.less,
-            ">=": self.greaterOrEqual,
-            "<=": self.lessOrEqual,
-            "inRange": self.inRange,
+            "==": val1 == val2,
+            "!=": val1 != val2,
+            ">": val1 > val2,
+            "<": val1 < val2,
+            ">=": val1 >= val2,
+            "<=": val1 <= val2,
+            "inRange": val1 in range(val2),
         }
-        var = operations[self.menuReturnValue]()
-        if plugIndex == 0:
-            self.outPlugs[0].setValue(var)
-            return self.outPlugs[0].getValue()
-        elif plugIndex == 1:
-            self.outPlugs[1].setValue(not var)
-            return self.outPlugs[1].getValue()
+        value = operations[self.menuReturnValue]
+        if value:
+            self.outPlugs[plugIndex].setValue(self.inPlugs[2].getValue())
+        else:
+            if self.inPlugs[3].getValue() is not None:
+                self.outPlugs[plugIndex].setValue(self.inPlugs[3].getValue())
+            else:
+                self.outPlugs[plugIndex].setValue(value)
+        self.nodeGraphic.updateTxtValuePosition()
+        return self.outPlugs[plugIndex].getValue()
 
     def showContextMenu(self, position):
         contextMenu = QMenu()
@@ -56,20 +61,34 @@ class IfNode(AbstractNodeInterface):
         action7 = contextMenu.addAction("inRange")
         action = contextMenu.exec(position)
         if action == action1:
-            self.menuReturnValue = "=="
+            self.execMenu(action1, "==")
         elif action == action2:
-            self.menuReturnValue = "!="
+            self.execMenu(action2, "!=")
         elif action == action3:
-            self.menuReturnValue = ">"
+            self.execMenu(action3, ">")
         elif action == action4:
-            self.menuReturnValue = "<"
+            self.execMenu(action4, "<")
         elif action == action5:
-            self.menuReturnValue = ">="
+            self.execMenu(action5, ">=")
         elif action == action6:
-            self.menuReturnValue = "<="
+            self.execMenu(action6, "<=")
         elif action == action7:
-            self.menuReturnValue = "inRange"
+            self.execMenu(action7, "inRange")
 
+    def execMenu(self, action, operator):
+        self.menuReturnValue = operator
+        title = operator
+        self.setGraphicTitleText(title)
+        if self.nodeData.outConnections:
+            for connection in self.nodeData.outConnections:
+                connection.updateValue()
+        else:
+            self.nodeData.calculate()
+
+    def setOperator(self, operator):
+        self.menuReturnValue = operator
+        title = operator
+        self.setGraphicTitleText(title)
         if self.nodeData.outConnections:
             for connection in self.nodeData.outConnections:
                 connection.updateValue()

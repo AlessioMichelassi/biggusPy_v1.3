@@ -3,6 +3,10 @@ import ast
 
 class CodeToNode:
     lastNode = None
+    lastIfNode = None
+    lastForNode = None
+    lastFunctionNode = None
+    lastWhileNode = None
 
     def __init__(self, canvas):
         self.canvas = canvas
@@ -145,8 +149,11 @@ class CodeToNode:
             pass
 
     def returnBiggusPyNode(self, className: str, value, name):
-        node = self.canvas.createNode(className, value)
-        node.changeInputValue(0, value, True)
+        if value is None:
+            node = self.canvas.createNode(className, "")
+        else:
+            node = self.canvas.createNode(className, value)
+            node.changeInputValue(0, value, True)
         if node is not None:
             node.setName(name)
             self.canvas.addNode(node)
@@ -337,7 +344,7 @@ class CodeToNode:
         leftType = self.returnType(left)
         rightType = self.returnType(right)
         print(f"leftType: {leftType}")
-        # crea l'op node dopo aver controllato se left e right esistono
+        # Crea l'op node dopo aver controllato se left e right esistono
         # se esistono e il className di left è NumberNode crea il mathNode
         # altrimenti crea una string etc etc... altrimenti crea un variableNode
         # e ritorna un opNode che adesso andrà creato nella lista dei nodi!
@@ -422,49 +429,105 @@ class CodeToNode:
     # ------------------ IF NODE ------------------
 
     @staticmethod
-    def returnIfOperator(value):
+    def returnIfOperator(left=None, right=None, operator=None, value=None):
         if isinstance(value, ast.Compare):
-            return "=="
-        # crea le possibilità per !=, >, <, >=, <=, in range
-        # create the possibilities for !=,>, <,> =, <=, inrange
-        elif isinstance(value, ast.NotEq):
-            return "!="
-        elif isinstance(value, ast.Gt):
-            return ">"
-        elif isinstance(value, ast.Lt):
-            return "<"
-        elif isinstance(value, ast.GtE):
-            return ">="
-        elif isinstance(value, ast.LtE):
-            return "<="
-        elif isinstance(value, ast.In):
-            return "inRange"
-        else:
-            return None
+            if left is None:
+                left = value.left
+            if right is None:
+                right = value.comparators[0]
+            if operator is None:
+                operator = value.ops[0]
 
-    def createIfNode(self, value, name):
+            if isinstance(operator, ast.Eq):
+                return "=="
+            elif isinstance(operator, ast.NotEq):
+                return "!="
+            elif isinstance(operator, ast.Gt):
+                return ">"
+            elif isinstance(operator, ast.Lt):
+                return "<"
+            elif isinstance(operator, ast.GtE):
+                return ">="
+            elif isinstance(operator, ast.LtE):
+                return "<="
+            elif isinstance(operator, ast.In):
+                return "inRange"
+        return None
+
+    def createIfNode(self, node):
+        operator = self.returnIfOperator(left=node.test.left, right=node.test.comparators[0], value=node.test)
+        ifNode = self.returnBiggusPyNode("IfNode", True, "IfNode")
+        ifNode.setOperator(operator)
+        # scrivendo print(ast.dump(node)) ottengo: If(test=Compare(left=Name(id='b', ctx=Load()), ops=[Gt()],
+        # comparators=[Name(id='a', ctx=Load())]), body=[Expr( value=Call(func=Name(id='print', ctx=Load()),
+        # args=[Constant(value='b is greater than a')], keywords=[]))], orelse=[])
+        leftNode = node.test.left
+        arg1 = self.canvas.getNodeByName(leftNode.id)
+        arg2 = self.canvas.getNodeByName(node.test.comparators[0].id)
+
+        if arg1 is not None and arg2 is not None:
+            self.setIfNodePosition(arg1, arg2, ifNode)
+            self.createConnection(arg1, ifNode)
+            self.createConnection(arg2, ifNode)
+
+        body = node.body
+        # ora devo creare i nodi per il corpo dell'if, per farlo devo creare un nodo per ogni istruzione
+
+        for statement in body:
+            if isinstance(statement, ast.Expr):
+                if isinstance(statement.value, ast.Call):
+                    if statement.value.func.id == "print":
+                        # if find a print statement, create a printNode
+                        args = statement.value.args
+                        if len(args) > 0 and isinstance(args[0], ast.Constant):
+                            printNode = self.returnBiggusPyNode("PrintNode", True, "PrintNode")
+                            text = args[0].value
+                            if text is not None:
+                                stringNode = self.returnBiggusPyNode("StringNode", text, "StringNode")
+                                self.setIfBodyNodePosition(stringNode)
+                                self.setIfOutNodePosition(printNode)
+                                self.createConnection(stringNode, ifNode)
+                            else:
+                                self.setIfBodyNodePosition(printNode)
+                            self.createConnection(ifNode, printNode)
+
+    def setIfNodePosition(self, arg1, arg2, ifNode):
         """
         ITA:
-            Crea un nodo ifNode
+            Funziona in modo simile all'opNodePosition, ma setta la posizione di ifNode
+            in self.lastIfNode in modo da posizionare i nodi del body dell'if
         ENG:
-            Create an ifNode node
-        :param value:
-        :param name:
+            Works in a similar way to opNodePosition, but sets the position of ifNode
+            in self.lastIfNode in order to position the nodes of the if body
+        :param arg1:
+        :param arg2:
+        :param ifNode:
         :return:
         """
-        assignmentVariable = self.canvas.getNodeByName(name)
-        operator = self.returnIfOperator(value)
-        if assignmentVariable is None:
-            print("WARNING: assignmentVariable is None")
-            return None
-        if operator is None:
-            print("WARNING: operator is None")
-            return None
-        left = value.left
-        right = value.comparators[0]
-        ifNode = self.searchWhichNodeToCreate(left, right, operator, assignmentVariable, name)
-        self.checkIfLeftAndRightVariablesExist(left, right, ifNode, assignmentVariable, name)
-        return ifNode
+        x0 = arg1.getPos().x()
+        x1 = max(arg1.getWidth(), arg2.getWidth()) * 1.2
+        x = (x0 + x1) * 2
+        y0 = arg1.getPos().y()
+        y1 = arg2.getPos().y()
+        y = (y0 + y1) // 2
+        self.updateNodePosition(ifNode, x, y)
+        self.lastIfNode = ifNode
+
+    def setIfBodyNodePosition(self, *args):
+        lastNode = self.lastIfNode
+        x = lastNode.getPos().x() + lastNode.getWidth() * 2
+        y = lastNode.getPos().y() - lastNode.getHeight() * 1.2
+        for node in args:
+            self.updateNodePosition(node, x, y)
+            x += node.getWidth() * 2
+            y += lastNode.getPos().y() - node.getHeight()
+            lastNode = node
+
+    def setIfOutNodePosition(self, node):
+        lastNode = self.lastIfNode
+        x = lastNode.getPos().x() + lastNode.getWidth() * 2
+        y = lastNode.getPos().y() + lastNode.getHeight() * 1.2
+        self.updateNodePosition(node, x, y)
 
     # ------------------ NODE POSITIONING ------------------
 

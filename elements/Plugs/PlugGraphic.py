@@ -30,6 +30,7 @@ class PlugGraphic(QGraphicsItem):
     isLocked = True
     isGraphicalRenamePermitted = False
     nodeGraphic = None
+    isTxtReversed = False
 
     def __init__(self, plugData, diameter=8, parent=None):
         super().__init__(parent)
@@ -68,12 +69,24 @@ class PlugGraphic(QGraphicsItem):
         self.txtTitle.setZValue(2)
 
     def defineTextPosition(self):
-        x = self.txtTitle.boundingRect().width()
-        if "In" in self.plugData.className:
-            x = (x * -1) - 5
-        elif "Out" in self.plugData.className:
-            x = 10
-        self.txtTitle.setPos(x, -10)
+        if not self.isTxtReversed:
+            x = self.txtTitle.boundingRect().width()
+            if "In" in self.plugData.className:
+                x = (x * -1) - 5
+            elif "Out" in self.plugData.className:
+                x = 10
+            self.txtTitle.setPos(x, -10)
+        else:
+            x = self.txtTitle.boundingRect().width()
+            y = 0
+            if "In" in self.plugData.className:
+                x = 10
+                self.txtTitle.setPos(x, -10)
+            elif "Out" in self.plugData.className:
+                x = (x * -1) - 5
+                y = -10
+                self.txtTitle.setPos(x, y)
+        self.update()
 
     def updateTitle(self):
         self.txtTitle.setPlainText(self.title)
