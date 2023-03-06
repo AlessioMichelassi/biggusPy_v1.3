@@ -120,11 +120,6 @@ class FunctionNode(AbstractNodeInterface):
         self.functionWidget.move(int(self.width // 2 - self.functionWidget.width() // 2),
                                  int(self.height // 2 - self.functionWidget.height() // 2) + 20)
 
-    def createFunction2(self, functionString: str):
-        self.functionString = functionString
-        self.function = ast.parse(functionString, mode="eval")
-        self.function = compile(self.function, filename="<ast>", mode="eval")
-
     def createFunction(self, _functionString):
         try:
             # calculate function
@@ -165,6 +160,7 @@ class FunctionNode(AbstractNodeInterface):
                 print("Wrong number of arguments. Expected %d, got %d" % (arg_count, len(args)))
             try:
                 self.outPlugs[plugIndex].setValue(self.function(*args))
+                self.functionWidget.lineEdit.setText(str(self.outPlugs[plugIndex].getValue()))
             except Exception as e:
                 print("something happen", e)
             if self.isProxied:

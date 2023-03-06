@@ -8,7 +8,7 @@ class CodeToNode:
     lastFunctionNode = None
     lastWhileNode = None
     code = None
-
+    functionNodeList = []
     def __init__(self, canvas):
         self.canvas = canvas
 
@@ -52,9 +52,9 @@ class CodeToNode:
             elif isinstance(node, ast.Call):
                 try:
                     if isinstance(node.func, ast.Name):
-                        print(node.func.id)
+                        self.createCallNode(node)
                     elif isinstance(node.func, ast.Attribute):
-                        print(node.func.attr)
+                        self.createCallNode(node)
                 except Exception as e:
                     print("*" * 20)
                     print(e)
@@ -521,12 +521,32 @@ class CodeToNode:
         self.code = self.code.replace(code, "")
         # deve saltare l'intestazione def...
         functionNode = self.returnBiggusPyNode("FunctionNode", code, "FunctionNode")
+        self.functionNodeList.append(functionNode)
         functionNode.setName(node.name)
-        self.updateNodePosition(functionNode, 0, 0)
         self.lastFunctionNode = functionNode
-        print(self.code)
-        self.parseCode(self.code)
+        self.createNodeFromCode(self.code)
 
+    # ------------------ CALL NODE ------------------
+
+    def createCallNode(self, node):
+        # cerca se il nodo è già stato creato
+        callNode = self.canvas.getNodeByName(node.func.id)
+        if callNode is None:
+            print("callNode is None")
+        else:
+            # trovato il nodo, ora devo creare i nodi per gli argomenti
+            args = node.args
+            for arg in args:
+                if isinstance(arg, ast.Name):
+                    argNode = self.canvas.getNodeByName(arg.id)
+                    if argNode is not None:
+                        self.callNodePosition(argNode, callNode)
+                        self.createConnection(argNode, callNode)
+
+    def callNodePosition(self, argNode, callNode):
+        x = argNode.getPos().x() + argNode.getWidth() * 2
+        y = argNode.getPos().y()
+        self.updateNodePosition(callNode, x, y)
 
 
     # ------------------ NODE POSITIONING ------------------
