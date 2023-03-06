@@ -10,7 +10,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 
 class ForNode(AbstractNodeInterface):
-    startValue = []
+    resetValue = []
     startFunction = lambda x: x
     width = 120
     height = 80

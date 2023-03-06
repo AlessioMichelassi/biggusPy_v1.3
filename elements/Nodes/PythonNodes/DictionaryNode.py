@@ -10,7 +10,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 class DictionaryNode(AbstractNodeInterface):
     menuReturnValue = "reset"
-    startValue = {"a": 1, "b": 2, "c": 3}
+    resetValue = {"a": 1, "b": 2, "c": 3}
     width = 120
     height = 80
     colorTrain = [QColor(102, 92, 115), QColor(68, 61, 77), QColor(133, 120, 149), QColor(153, 138, 172),

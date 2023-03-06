@@ -11,7 +11,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 class ListNode(AbstractNodeInterface):
     _className = "ListNode"
     menuReturnValue = "reset"
-    startValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    resetValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     width = 120
     height = 80
     colorTrain = [QColor(219, 255, 190),QColor(226, 190, 255),QColor(226, 190, 255),QColor(190, 252, 255),QColor(255, 155, 127),QColor(127, 227, 255),QColor(127, 227, 255),QColor(163, 255, 127),]

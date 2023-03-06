@@ -9,7 +9,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 
 class MathNode(AbstractNodeInterface):
-    startValue = 0
+    resetValue = 0
     menuReturnValue = "+"
     width = 120
     height = 80

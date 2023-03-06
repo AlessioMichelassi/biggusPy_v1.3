@@ -19,7 +19,7 @@ from widgets.CodeToNodeWidget.codeToNode2 import CodeToNode
 
 class Canvas(QWidget):
     node_name_list = ["NumberNode", "StringNode", "ListNode", "DictionaryNode", "MathNode",
-                      "IfNode", "ForNode", "RangeNode", "FunctionNode", "BooleanNode", "WhileNode", "AndNode"]
+                      "IfNode", "ForNode", "RangeNode", "FunctionNode", "BooleanNode", "WhileNode", "AndNode", "PrintNode"]
     mainLayout: QVBoxLayout
     graphicScene: GraphicSceneOverride
     graphicView: QGraphicsView
@@ -57,6 +57,7 @@ class Canvas(QWidget):
         _forNode = contextMenu.addAction("For Node")
         _functionNode = contextMenu.addAction("Function Node")
         _booleanNode = contextMenu.addAction("Boolean Node")
+        _printNode = contextMenu.addAction("Print Node")
         _addClassNode = contextMenu.addAction("Add Class Node")
         _nodeToCode = contextMenu.addAction("codeToNode")
         action = contextMenu.exec(self.mapToGlobal(event.pos()))
@@ -81,6 +82,8 @@ class Canvas(QWidget):
             self.addNodeByName("FunctionNode")
         elif action == _booleanNode:
             self.addNodeByName("BooleanNode")
+        elif action == _printNode:
+            self.addNodeByName("PrintNode")
         elif action == _addClassNode:
             rectangle = ResizableRectangle(0, 0, 1000, 1000)
             self.graphicScene.addItem(rectangle)
@@ -128,9 +131,9 @@ class Canvas(QWidget):
         try:
             if nodeClass:
                 node = nodeClass(*args, **kwargs)
-                value = kwargs.get("value", node.startValue)
+                value = kwargs.get("value", node.resetValue)
                 if value:
-                    node.startValue = value
+                    node.resetValue = value
                 return node
         except Exception as e:
             print(f"Error in createNode: {className} {e}")
@@ -275,7 +278,7 @@ class Canvas(QWidget):
         codeString = """a = "Hello, World!"\nb = "Hello, World!"\nc = a + b"""
         codeIf = """a = 33\nb = 200\nif b > a:\n  print("b is greater than a")"""
         code = f"""{codeTuple}\n{codeList}\n{codeSet}\n{codeDict}"""
-        codeToNode.createNodeFromCode(code4)
+        codeToNode.createNodeFromCode(codeIf)
         self.graphicView.selectAllCenterSceneAndDeselect()
 
     def createNodeFromCodeToNode(self, className, *args, **kwargs):
@@ -318,15 +321,19 @@ class Canvas(QWidget):
         self.width = deserialized['sceneWidth']
         self.height = deserialized['sceneHeight']
         nodes = deserialized['Nodes']
+
         for node in nodes:
-            self.addSerializedNode(node)
+            if node is not None:
+                self.addSerializedNode(node)
         for node in nodes:
-            self.deserializeConnections(node)
+            if node is not None:
+                self.deserializeConnections(node)
 
     def addSerializedNode(self, serializedJsonDictionary, _position=None):
         deserialized = json.loads(serializedJsonDictionary)
 
         _className = deserialized["className"]
+        _name = deserialized["name"]
         _title = deserialized["title"]
         _index = deserialized["index"]
         _pos = deserialized["pos"]
@@ -342,8 +349,11 @@ class Canvas(QWidget):
             pos = QPointF(float(_pos[0]), float(_pos[1]))
         if "Number" in _className:
             node = self.createNode(_className, value=_value)
+            node.setName(_name)
+            node.changeInputValue(0, _value, True)
         else:
             node = self.createNode(_className)
+            node.setName(_name)
 
         self.addNode(node)
         node.setPos(pos)

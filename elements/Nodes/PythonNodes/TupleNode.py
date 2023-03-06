@@ -11,7 +11,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 class TupleNode(AbstractNodeInterface):
     menuReturnValue = "reset"
-    startValue = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    resetValue = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     width = 120
     height = 80
     colorTrain = [QColor(102, 92, 115), QColor(68, 61, 77), QColor(133, 120, 149), QColor(153, 138, 172),

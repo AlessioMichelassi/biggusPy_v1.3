@@ -386,12 +386,12 @@ class AbstractNodeInterface:
         connections = []
         for connection in self.nodeData.outConnections:
             connections.append(connection.serialize())
-        value = self.nodeData.inPlugs[0].getValue()[0]
         dicts = OrderedDict([
             ('className', self.className),
-            ('title', self.title),
+            ('name', self.getName()),
+            ('title', self.nodeData.getTitle()),
             ('index', self.index),
-            ('value', value),
+            ('value', self.nodeData.inPlugs[0].getValue()),
             ('pos', (int(self.nodeGraphic.pos().x()), int(self.nodeGraphic.pos().y()))),
             ('inPlugsNumb', len(self.inPlugs)),
             ('outPlugsNumb', len(self.outPlugs)),

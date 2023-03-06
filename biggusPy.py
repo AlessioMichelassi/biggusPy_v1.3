@@ -15,6 +15,7 @@ from scratchNodeV0_9.scratchNode import scratchNodeV0_9
 class biggusPy(QMainWindow):
     statusMousePosition: QLabel
     path = "saveDir"
+    fileName = "untitled"
     recentFilesMenu: QMenu
     recentFiles = []
 
@@ -106,15 +107,6 @@ class biggusPy(QMainWindow):
         self.restartCanvas()
         print(f"this is a print debug from canvas: {self.canvas}")
 
-    def openFile(self, filePath):
-        with open(filePath, "r") as f:
-            file = f.read()
-        self.canvas.deserialize(file)
-        self.canvas.fileName = filePath.split("/")[-1].split(".")[0]
-        self.statusBar().showMessage(f"{self.canvas.fileName}", 2000)
-        self.saveRecentFiles([filePath])
-        self.updateRecentFileMenu()
-
     def onOpen(self):
         self.onNew()
         openDialog = QFileDialog(self, "Open a file")
@@ -130,15 +122,27 @@ class biggusPy(QMainWindow):
         self.saveRecentFiles([openDialog.selectedFiles()[0]])
         self.updateRecentFileMenu()
 
-    def onSave(self, fileName=None):
+    def openFile(self, filePath):
+        with open(filePath, "r") as f:
+            file = f.read()
+        self.canvas.deserialize(file)
+        self.canvas.fileName = filePath.split("/")[-1].split(".")[0]
+        self.statusBar().showMessage(f"{self.canvas.fileName}", 2000)
+        self.saveRecentFiles([filePath])
+        self.updateRecentFileMenu()
+
+    def onSave(self):
         fileData = self.canvas.serialize()
-        if fileName is None:
+        if self.fileName is None:
             file = f"{self.path}/{self.canvas.fileName}.json"
         else:
             file = fileName
             self.canvas.fileName = file.split("/")[-1].split(".")[0]
             self.statusBar().showMessage(f"File saved as {self.canvas.fileName}", 2000)
-        with open(file, "w+") as file:
+
+
+    def saveFile(self, filename, fileData):
+        with open(filename, "w+") as file:
             file.write(fileData)
 
     def onSaveAs(self):

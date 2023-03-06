@@ -10,7 +10,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 
 class WhileNode(AbstractNodeInterface):
-    startValue = []
+    resetValue = []
     startFunction = "value = 0    def doThis():    value += 1    print(f'value from function {value}')"
     width = 120
     height = 80

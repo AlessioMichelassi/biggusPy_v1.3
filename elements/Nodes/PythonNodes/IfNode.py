@@ -9,7 +9,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 
 class IfNode(AbstractNodeInterface):
-    startValue = True
+    resetValue = True
     menuReturnValue = "=="
     width = 120
     height = 80

@@ -41,7 +41,7 @@ class CodeToNode:
             elif isinstance(node, ast.For):
                 print("For")
             elif isinstance(node, ast.If):
-                print("If")
+                self.createIfNode(node)
             elif isinstance(node, ast.Call):
                 try:
                     if isinstance(node.func, ast.Name):
@@ -146,6 +146,7 @@ class CodeToNode:
 
     def returnBiggusPyNode(self, className: str, value, name):
         node = self.canvas.createNode(className, value)
+        node.changeInputValue(0, value, True)
         if node is not None:
             node.setName(name)
             self.canvas.addNode(node)
@@ -293,7 +294,12 @@ class CodeToNode:
         """
         assignmentVariable = self.returnBiggusPyNode("VariableNode", value, name)
         operator = self.returnOperator(value.op)
-        print(f"operator: {operator}")
+        if assignmentVariable is None:
+            print("WARNING: assignmentVariable is None")
+            return None
+        if operator is None:
+            print("WARNING: operator is None")
+            return None
         opNode = None
         left = value.left
         right = value.right
@@ -412,6 +418,53 @@ class CodeToNode:
         x = opNode.getPos().x() + opNode.getWidth() * 2
         y = opNode.getPos().y()
         self.updateNodePosition(assignmentVariable, x, y)
+
+    # ------------------ IF NODE ------------------
+
+    @staticmethod
+    def returnIfOperator(value):
+        if isinstance(value, ast.Compare):
+            return "=="
+        # crea le possibilità per !=, >, <, >=, <=, in range
+        # create the possibilities for !=,>, <,> =, <=, inrange
+        elif isinstance(value, ast.NotEq):
+            return "!="
+        elif isinstance(value, ast.Gt):
+            return ">"
+        elif isinstance(value, ast.Lt):
+            return "<"
+        elif isinstance(value, ast.GtE):
+            return ">="
+        elif isinstance(value, ast.LtE):
+            return "<="
+        elif isinstance(value, ast.In):
+            return "inRange"
+        else:
+            return None
+
+    def createIfNode(self, value, name):
+        """
+        ITA:
+            Crea un nodo ifNode
+        ENG:
+            Create an ifNode node
+        :param value:
+        :param name:
+        :return:
+        """
+        assignmentVariable = self.canvas.getNodeByName(name)
+        operator = self.returnIfOperator(value)
+        if assignmentVariable is None:
+            print("WARNING: assignmentVariable is None")
+            return None
+        if operator is None:
+            print("WARNING: operator is None")
+            return None
+        left = value.left
+        right = value.comparators[0]
+        ifNode = self.searchWhichNodeToCreate(left, right, operator, assignmentVariable, name)
+        self.checkIfLeftAndRightVariablesExist(left, right, ifNode, assignmentVariable, name)
+        return ifNode
 
     # ------------------ NODE POSITIONING ------------------
 

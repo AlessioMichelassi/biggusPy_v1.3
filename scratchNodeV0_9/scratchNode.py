@@ -320,14 +320,14 @@ class scratchNodeV0_9(QMainWindow):
         class UntitledNode(AbstractNodeData):
 
             _className = "UntitledNode"
-            startValue = 0
+            resetValue = 0
             width = 50 <--- aggiornato il valore
             height = 50 <--- aggiornato il valore
             colorTrain = [] <--- aggiornato il valore
 
             def __init__(self, value, inNum=1, outNum=1): <--- aggiornato il valore inNum e outNum
                 super().__init__(inNum, outNum)
-                self.startValue = value
+                self.resetValue = value
                 self.changeValue(value, type(value), 0, True)
 
         :return:

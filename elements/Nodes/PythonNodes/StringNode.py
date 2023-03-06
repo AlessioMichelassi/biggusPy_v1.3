@@ -9,7 +9,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 
 class StringNode(AbstractNodeInterface):
-    startValue = "HelloWorld!"
+    resetValue = "HelloWorld!"
     width = 120
     height = 80
     colorTrain = [QColor(132, 255, 121), QColor(255, 121, 166), QColor(233, 255, 121), QColor(121, 255, 210),
