@@ -16,6 +16,24 @@ from graphicEngine.graphicViewOverride import GraphicViewOverride
 
 from widgets.CodeToNodeWidget.codeToNode2 import CodeToNode
 
+code2 = '''
+a = 80
+def SieveOfEratosthenes(n):
+    prime_list = []
+    for i in range(2, n+1):
+        if i not in prime_list:
+            print (i)
+            for j in range(i*i, n+1, i):
+                prime_list.append(j)'''
+
+codeComplex1 = '''
+def printValues(values):
+    for value in values:
+        print(value)
+
+numberNode = 6
+values = [1, 2, 3, 4, 5]
+printValues(values)'''
 
 class Canvas(QWidget):
     node_name_list = ["NumberNode", "StringNode", "ListNode", "DictionaryNode", "MathNode",
@@ -260,7 +278,7 @@ class Canvas(QWidget):
         """
         # test codeToNode
         codeToNode = CodeToNode(self)
-        code2 = '''def SieveOfEratosthenes(n):
+        codexxx2 = '''def SieveOfEratosthenes(n):
                                 prime_list = []
                                 for i in range(2, n+1):
                                     if i not in prime_list:
@@ -278,7 +296,7 @@ class Canvas(QWidget):
         codeString = """a = "Hello, World!"\nb = "Hello, World!"\nc = a + b"""
         codeIf = """a = 33\nb = 200\nif b > a:\n  print("b is greater than a")"""
         code = f"""{codeTuple}\n{codeList}\n{codeSet}\n{codeDict}"""
-        codeToNode.createNodeFromCode(code4)
+        codeToNode.createNodeFromCode(codeComplex1)
         self.graphicView.selectAllCenterSceneAndDeselect()
 
     def createNodeFromCodeToNode(self, className, *args, **kwargs):

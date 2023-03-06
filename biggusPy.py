@@ -140,7 +140,6 @@ class biggusPy(QMainWindow):
             self.canvas.fileName = file.split("/")[-1].split(".")[0]
             self.statusBar().showMessage(f"File saved as {self.canvas.fileName}", 2000)
 
-
     def saveFile(self, filename, fileData):
         with open(filename, "w+") as file:
             file.write(fileData)
@@ -157,7 +156,7 @@ class biggusPy(QMainWindow):
             QMessageBox.warning(self, "Dock Widgets",
                                 f"Cannot write file {filename}:\n{reason}.")
             return
-        self.onSave(filename)
+        self.onSave()
 
     def onAbout(self):
         pass

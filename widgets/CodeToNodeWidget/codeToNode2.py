@@ -7,6 +7,7 @@ class CodeToNode:
     lastForNode = None
     lastFunctionNode = None
     lastWhileNode = None
+    code = None
 
     def __init__(self, canvas):
         self.canvas = canvas
@@ -28,6 +29,7 @@ class CodeToNode:
         :param _code:
         :return:
         """
+        self.code = _code
         parsedCode = self.parseCode(_code)
         self.nodeSearch(parsedCode)
         self.setNodePosition()
@@ -42,6 +44,7 @@ class CodeToNode:
         for node in ast.walk(parsedCode):
             if isinstance(node, ast.FunctionDef):
                 self.createFunctionNode(node)
+                break
             elif isinstance(node, ast.For):
                 print("For")
             elif isinstance(node, ast.If):
@@ -66,24 +69,6 @@ class CodeToNode:
 
     def createConnections(self):
         pass
-
-    def createFunctionNode(self, node: ast.FunctionDef):
-        """
-        ITA:
-            In biggusPy c'è un nodo function che può essere usato per creare una funzione.
-            Questo metodo crea un nodo function e gli passa i parametri della funzione.
-        ENG:
-            In biggusPy there is a function node that can be used to create a function.
-            This method creates a function node and passes it the function parameters.
-        :param node:
-        :return:
-        """
-        print(node.name)
-        print(node.args)
-        print(node.body)
-        print(node.decorator_list)
-        print(node.returns)
-        print(node.type_comment)
 
     def createVariableNode(self, name: str, value):
         """
@@ -528,6 +513,21 @@ class CodeToNode:
         x = lastNode.getPos().x() + lastNode.getWidth() * 2
         y = lastNode.getPos().y() + lastNode.getHeight() * 1.2
         self.updateNodePosition(node, x, y)
+
+    # ------------------ FUNCTION NODE ------------------
+
+    def createFunctionNode(self, node):
+        code = ast.get_source_segment(self.code, node).strip()
+        self.code = self.code.replace(code, "")
+        # deve saltare l'intestazione def...
+        functionNode = self.returnBiggusPyNode("FunctionNode", code, "FunctionNode")
+        functionNode.setName(node.name)
+        self.updateNodePosition(functionNode, 0, 0)
+        self.lastFunctionNode = functionNode
+        print(self.code)
+        self.parseCode(self.code)
+
+
 
     # ------------------ NODE POSITIONING ------------------
 

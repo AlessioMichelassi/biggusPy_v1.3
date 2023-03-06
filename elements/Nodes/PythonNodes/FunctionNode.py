@@ -164,7 +164,7 @@ class FunctionNode(AbstractNodeInterface):
             if len(args) != arg_count:
                 print("Wrong number of arguments. Expected %d, got %d" % (arg_count, len(args)))
             try:
-                self.outPlugs[plugIndex].setValue(self.function(*args), int, "result")
+                self.outPlugs[plugIndex].setValue(self.function(*args))
             except Exception as e:
                 print("something happen", e)
             if self.isProxied:
