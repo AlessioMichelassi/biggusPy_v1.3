@@ -22,7 +22,7 @@ class biggusPy(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent, Qt.WindowFlags())
         self.setGeometry(100, 100, 800, 600)
-        self.setWindowTitle("BiggusPy(a great Caesar's friend) V0.1.2")
+        self.setWindowTitle("BiggusPy(a great Caesar's friend) V0.1.3")
         self.setWindowIcon(QIcon('elements/imgs/BiggusIcon.ico'))
         self.canvas = Canvas()
         self.setCentralWidget(self.canvas)
@@ -136,7 +136,7 @@ class biggusPy(QMainWindow):
         if self.fileName is None:
             file = f"{self.path}/{self.canvas.fileName}.json"
         else:
-            file = fileName
+            file = self.fileName
             self.canvas.fileName = file.split("/")[-1].split(".")[0]
             self.statusBar().showMessage(f"File saved as {self.canvas.fileName}", 2000)
 

@@ -61,7 +61,7 @@ class AbstractNodeInterface:
     isDisabled = False
     contextMenu = None
     resetValue = 0
-    isEditable = True
+    isEditable = False
     canvas = None
     mainWidget = None
     _isNodeCreated = False
