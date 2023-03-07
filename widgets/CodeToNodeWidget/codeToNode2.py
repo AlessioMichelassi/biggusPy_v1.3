@@ -1,5 +1,7 @@
 import ast
 
+from PyQt5.QtCore import QPointF
+
 
 class CodeToNode:
     lastNode = None
@@ -11,6 +13,7 @@ class CodeToNode:
     functionNodeList = []
     copied_functions = {}
     callNodeList = []
+    variableForCallNode = None
 
     def __init__(self, canvas):
         self.canvas = canvas
@@ -61,7 +64,7 @@ class CodeToNode:
                 fn = self.createFunctionNode(node)
                 function_nodes.append(fn)
                 self.removeCodeAndRestart(node)
-
+                break
             elif isinstance(node, ast.For):
                 print("For")
             elif isinstance(node, ast.If):
@@ -69,6 +72,7 @@ class CodeToNode:
             elif isinstance(node, ast.Call):
                 try:
                     if isinstance(node.func, ast.Name):
+                        print(f"debug: {node.func.id} {node.func.__class__.__name__} {node.func.__dict__} {node.func.__class__.__dict__}")
                         self.createCallNode(node)
                     elif isinstance(node.func, ast.Attribute):
                         self.createCallNode(node)
@@ -103,7 +107,9 @@ class CodeToNode:
         :param value:
         :return:
         """
+        print(f"\ncreateVariableNode: {name} = {value} {value.__class__.__name__}")
         node = None
+
         # ast.Num sono i numeri
         if isinstance(value, ast.Num):
             node = self.returnBiggusPyNode("NumberNode", value.n, name)
@@ -127,7 +133,11 @@ class CodeToNode:
             print(f"Fount attribute {value} but AttributeNode is not implemented yet")
         # ast.Call sono le chiamate a funzioni tipo print()
         elif isinstance(value, ast.Call):
-            node = self.createCallNode(value)
+            if value.func.id == name:
+                node = self.createCallNode(value)
+            else:
+                node = self.returnBiggusPyNode("VariableNode", value.func.id, name)
+                self.variableForCallNode = node
         # ast.BinOp sono le operazioni binarie tipo 1 + 1
         elif isinstance(value, ast.BinOp):
             node = self.createBinOpNode(value, name)
@@ -560,7 +570,7 @@ class CodeToNode:
         self.lastFunctionNode = functionNode
         return functionNode
 
-    def copyFunction(self, node, function, variable):
+    def copyFunction(self, function):
         function = function.clone()
         function.getName()
         code = function.functionString
@@ -578,29 +588,69 @@ class CodeToNode:
         try:
             code = ast.get_source_segment(self.code, node).strip()
             print(f"\ncreateCallNode: {node.func.id} with code:\n {code}\n")
-        except:
-            pass
+        except Exception as e:
+            a = e
         # cerca se il nodo è già stato creato
         callNode = self.canvas.getNodeByName(node.func.id)
+
         if callNode is None:
             print("callNode is None")
+            callNode = self.returnBiggusPyNode("FunctionNode", node, node.func.id)
+            self.canvas.addNode(callNode)
         else:
-            # trovato il nodo, ora devo creare i nodi per gli argomenti
-            args = node.args
-            for arg in args:
-                if isinstance(arg, ast.Name):
-                    argNode = self.canvas.getNodeByName(arg.id)
-                    if argNode is not None:
-                        self.callNodePosition(argNode, callNode)
-                        self.createConnection(argNode, callNode)
-                    else:
-                        print(f"argNode {arg.id} is None")
+            print(f"callNode {node.func.id} already exists")
+            if callNode.outConnections:
+                print(f"callNode {node.func.id} is connected")
+                callNode = self.copyFunction(callNode)
+
+        # trovato il nodo, ora devo creare i nodi per gli argomenti
+        self.searchForCallNodeArgs(node, callNode)
         return callNode
 
+    def searchForCallNodeArgs(self, node, callNode):
+        args = node.args
+        constantArgs = []
+        for arg in args:
+            print(f"arg: {arg} {type(arg)}")
+            # se l'argomento è una variabile, devo cercare il nodo corrispondente
+            if isinstance(arg, ast.Name):
+                argNode = self.canvas.getNodeByName(arg.id)
+                if argNode is not None:
+                    self.createConnection(argNode, callNode)
+                    self.callNodePosition(argNode, callNode)
+                else:
+                    print(f"argNode {arg.id} is None")
+            # se l'argomento è una costante, generalmente è l'argomento della funzione stessa
+            elif isinstance(arg, ast.Constant):
+                if isinstance(arg.value, str):
+                    argNode = self.returnBiggusPyNode("StringNode", arg.value, "StringNode")
+                elif isinstance(arg.value, (int, float)):
+                    argNode = self.returnBiggusPyNode("NumberNode", arg.value, "NumberNode")
+                else:
+                    argNode = self.returnBiggusPyNode("VariableNode", arg.value, "VariableNode")
+                constantArgs.append(argNode)
+                self.createConnection(argNode, callNode)
+            elif isinstance(arg, ast.Assign):
+                print("arg is Assign")
+        if constantArgs:
+            self.setConstantArgsPosition(constantArgs, callNode)
+
     def callNodePosition(self, argNode, callNode):
-        x = argNode.getPos().x() + argNode.getWidth() * 2
+        x = (argNode.getPos().x() + argNode.getWidth()) * 2
         y = argNode.getPos().y()
         self.updateNodePosition(callNode, x, y)
+
+    def setConstantArgsPosition(self, constantArgs, callNode):
+        x = (constantArgs[0].getPos().x() + constantArgs[0].getWidth()) * 2*(len(constantArgs)-1)
+        y = (constantArgs[0].getPos().y() + constantArgs[-1].getPos().y()) // 2
+        callNode.setPos(QPointF(x, y))
+        if self.variableForCallNode is not None:
+            x = callNode.getWidth() * 2
+            y = callNode.getPos().y() + (callNode.getHeight() // 3)
+            self.variableForCallNode.setPos(QPointF(x, y))
+            self.createConnection(callNode, self.variableForCallNode)
+            self.variableForCallNode = None
+
 
     # ------------------ NODE POSITIONING ------------------
 

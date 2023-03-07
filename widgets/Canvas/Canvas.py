@@ -42,13 +42,13 @@ def add_and_multiply(a, b, c):
     return e
 
 x = add_and_multiply(1, 2, 3)
-"""
-"""
 y = add_and_multiply(4, 5, 6)
-
+"""
+"""
 z = x + y
 print(z)
 """
+
 
 class Canvas(QWidget):
     node_name_list = ["NumberNode", "StringNode", "ListNode", "DictionaryNode", "MathNode",
@@ -311,7 +311,7 @@ class Canvas(QWidget):
         codeString = """a = "Hello, World!"\nb = "Hello, World!"\nc = a + b"""
         codeIf = """a = 33\nb = 200\nif b > a:\n  print("b is greater than a")"""
         code = f"""{codeTuple}\n{codeList}\n{codeSet}\n{codeDict}"""
-        codeToNode.createNodeFromCode(codeComplex1)
+        codeToNode.createNodeFromCode(codeComplex2)
         self.graphicView.selectAllCenterSceneAndDeselect()
 
     def createNodeFromCodeToNode(self, className, *args, **kwargs):
