@@ -13,9 +13,10 @@ class BinOpNode(AbstractNodeInterface):
     menuReturnValue = "+"
     width = 120
     height = 80
-    colorTrain = [QColor(148, 209, 178),QColor(92, 10, 50),QColor(250, 47, 200),QColor(117, 66, 246),QColor(85, 230, 143),QColor(11, 39, 149),QColor(176, 103, 92),QColor(84, 255, 4),]
+    colorTrain = [QColor(148, 209, 178), QColor(92, 10, 50), QColor(250, 47, 200), QColor(117, 66, 246),
+                  QColor(85, 230, 143), QColor(11, 39, 149), QColor(176, 103, 92), QColor(84, 255, 4), ]
 
-    def __init__(self, value= 1, inNum=2, outNum=1, parent=None):
+    def __init__(self, value=1, inNum=2, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
         self.setClassName("BinOpNode")
         self.setName("BinOpNode")

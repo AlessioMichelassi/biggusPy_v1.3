@@ -13,7 +13,10 @@ class CodeToNode:
     functionNodeList = []
     copied_functions = {}
     callNodeList = []
-    variableForCallNode = None
+    variableForCallNode = []
+    callingIndex = 0
+
+    appendPositioningFunction = []
 
     def __init__(self, canvas):
         self.canvas = canvas
@@ -40,6 +43,14 @@ class CodeToNode:
         self.nodeSearch(parsedCode)
         self.setNodePosition()
         self.createConnections()
+        if self.appendPositioningFunction:
+            for function in self.appendPositioningFunction:
+                try:
+                    function()
+                except Exception as e:
+                    print("Error from CodeToNode.createNodeFromCode: ")
+                    print(f"function: {function}")
+                    print(e)
 
     @staticmethod
     def parseCode(_code: str):
@@ -54,7 +65,6 @@ class CodeToNode:
     def nodeSearch(self, parsedCode: ast.AST):
         function_nodes = []
         for node in ast.walk(parsedCode):
-            print(f"actual code Parsing: {node.__class__.__name__}")
             try:
                 print(f"actual code: {ast.get_source_segment(self.code, node).strip()}")
             except Exception as e:
@@ -86,10 +96,6 @@ class CodeToNode:
                         print(f"target: {target.id} = {node.value} {node.value.__class__.__name__}")
                         variable = self.createVariableNode(target.id, node.value)
                         print(f"variable: {variable} {variable.__class__.__name__}")
-                        for function in function_nodes:
-                            if function is not None and variable is not None:
-                                if function.getName() == variable.getName():
-                                    self.copyFunction(node, function, variable)
 
     def setNodePosition(self):
         pass
@@ -107,38 +113,30 @@ class CodeToNode:
         :param value:
         :return:
         """
-        print(f"\ncreateVariableNode: {name} = {value} {value.__class__.__name__}")
+        print(f"\ncreateVariableNode: {name} = {value}")
         node = None
 
         # ast.Num sono i numeri
         if isinstance(value, ast.Num):
             node = self.returnBiggusPyNode("NumberNode", value.n, name)
-        # ast.Str sono le stringhe
         elif isinstance(value, ast.Str):
             node = self.returnBiggusPyNode("StringNode", value.s, name)
-        # ast.List sono le liste
         elif isinstance(value, ast.List):
             node = self.returnBiggusPyNodeWithElements("ListNode", value, name)
-        # ast.Tuple sono le tuple
         elif isinstance(value, ast.Tuple):
             node = self.returnBiggusPyNodeWithElements("TupleNode", value, name)
-        # ast.Dict sono i dizionari
         elif isinstance(value, ast.Dict):
             node = self.returnBiggusPyNodeDictionary("DictionaryNode", value, name)
-        # ast.Name sono le variabili
         elif isinstance(value, ast.Name):
             node = self.returnBiggusPyNode("VariableNode", value.id, name)
-        # ast.Attribute sono gli attributi tipo self.var o
         elif isinstance(value, ast.Attribute):
-            print(f"Fount attribute {value} but AttributeNode is not implemented yet")
-        # ast.Call sono le chiamate a funzioni tipo print()
+            print(f"Found attribute {value} but AttributeNode is not implemented yet")
         elif isinstance(value, ast.Call):
             if value.func.id == name:
                 node = self.createCallNode(value)
             else:
                 node = self.returnBiggusPyNode("VariableNode", value.func.id, name)
-                self.variableForCallNode = node
-        # ast.BinOp sono le operazioni binarie tipo 1 + 1
+                self.variableForCallNode.append(node)
         elif isinstance(value, ast.BinOp):
             node = self.createBinOpNode(value, name)
         else:
@@ -332,11 +330,20 @@ class CodeToNode:
             return None
         opNode = None
         left = node.left
-        right = node.right
-        opNode = self.searchWhichNodeToCreate(left, right, operator, node, name)
-        print(f"opNode: {str(opNode)}")
-        self.checkIfLeftAndRightVariablesExist(left, right, opNode, assignmentVariable, name)
-        return opNode
+        if left is not None:
+            leftVariable = self.canvas.getNodeByName(left.id)
+            right = node.right
+            if leftVariable is None:
+                opNode = self.searchWhichNodeToCreate(left, right, operator, node, name)
+                print(f"opNode: {str(opNode)}")
+                self.checkIfLeftAndRightVariablesExist(left, right, opNode, assignmentVariable, name)
+                return opNode
+            else:
+                rightVariable = self.canvas.getNodeByName(right.id)
+                if rightVariable is not None:
+                    opNode = self.returnBiggusPyNode("MathNode", node, name)
+                    self.appendPositioningFunction.append(self.checkPositionForFunctionNext(leftVariable, rightVariable, opNode, assignmentVariable, name))
+                    return opNode
 
     def returnType(self, value):
         """
@@ -571,13 +578,11 @@ class CodeToNode:
         return functionNode
 
     def copyFunction(self, function):
-        function = function.clone()
-        function.getName()
+        print(function.getName())
         code = function.functionString
         inNum = len(function.inPlugs)
         outNum = len(function.outPlugs)
         functionNode = self.canvas.createNode("FunctionNode", code, inNum, outNum)
-
         functionNode.setName(function.getName())
         self.canvas.addNode(functionNode)
         return functionNode
@@ -611,7 +616,6 @@ class CodeToNode:
         args = node.args
         constantArgs = []
         for arg in args:
-            print(f"arg: {arg} {type(arg)}")
             # se l'argomento è una variabile, devo cercare il nodo corrispondente
             if isinstance(arg, ast.Name):
                 argNode = self.canvas.getNodeByName(arg.id)
@@ -644,13 +648,23 @@ class CodeToNode:
         x = (constantArgs[0].getPos().x() + constantArgs[0].getWidth()) * 2*(len(constantArgs)-1)
         y = (constantArgs[0].getPos().y() + constantArgs[-1].getPos().y()) // 2
         callNode.setPos(QPointF(x, y))
-        if self.variableForCallNode is not None:
+        if len(self.variableForCallNode) > self.callingIndex:
             x = callNode.getWidth() * 2
             y = callNode.getPos().y() + (callNode.getHeight() // 3)
-            self.variableForCallNode.setPos(QPointF(x, y))
-            self.createConnection(callNode, self.variableForCallNode)
-            self.variableForCallNode = None
+            self.variableForCallNode[self.callingIndex].setPos(QPointF(x, y))
+            self.createConnection(callNode, self.variableForCallNode[self.callingIndex])
+            self.callingIndex += 1
 
+    def checkPositionForFunctionNext(self, left, right, opNode, assignmentVariable, name):
+        x = (left.getPos().x() + right.getPos().x()) * 40
+        y = (left.getPos().y() + right.getPos().y()) // 2
+        opNode.setPos(QPointF(x, y))
+        self.createConnection(left, opNode)
+        self.createConnection(right, opNode)
+        x = opNode.getPos().x() + opNode.getWidth() * 2
+        y = opNode.getPos().y()
+        assignmentVariable.setPos(QPointF(x, y))
+        self.createConnection(opNode, assignmentVariable)
 
     # ------------------ NODE POSITIONING ------------------
 

@@ -43,9 +43,9 @@ def add_and_multiply(a, b, c):
 
 x = add_and_multiply(1, 2, 3)
 y = add_and_multiply(4, 5, 6)
-"""
-"""
 z = x + y
+"""
+"""
 print(z)
 """
 
@@ -56,8 +56,8 @@ class Canvas(QWidget):
     mainLayout: QVBoxLayout
     graphicScene: GraphicSceneOverride
     graphicView: QGraphicsView
-    width: int = 5000
-    height: int = 5000
+    width: int = 10000
+    height: int = 10000
     clipboard = None
 
     def __init__(self, parent=None):
@@ -177,7 +177,6 @@ class Canvas(QWidget):
         _node.updateTitle()
         self.nodesTitleList.append(_node.title)
         self.nodes.append(_node)
-
         self.graphicScene.addItem(_node.nodeGraphic)
 
     def addNodeByName(self, name, value=None):
