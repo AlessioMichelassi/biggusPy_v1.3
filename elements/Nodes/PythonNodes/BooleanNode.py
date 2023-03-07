@@ -33,7 +33,7 @@ class BooleanNode(AbstractNodeInterface):
 
     def showContextMenu(self, position):
         contextMenu = QMenu()
-        contextMenu.addSection("set value")
+        contextMenu.addSection("set node")
         actionTrue = contextMenu.addAction("True")
         actionFalse = contextMenu.addAction("False")
 

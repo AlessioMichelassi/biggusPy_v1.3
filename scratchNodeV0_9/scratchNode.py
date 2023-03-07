@@ -202,8 +202,8 @@ class scratchNodeV0_9(QMainWindow):
         Crea un nodo a partire dal nome della classe e dal modulo
         :param className: In questo caso sarà sempre "DefaultNode"
         :param mod: mod invece è il modulo creato con exec che controlla che il codice sia corretto
-        :param args: in args ci sono i parametri del costruttore tipo value=10
-        :param kwargs: in kwargs ci sono i parametri del costruttore tipo value=10
+        :param args: in args ci sono i parametri del costruttore tipo node=10
+        :param kwargs: in kwargs ci sono i parametri del costruttore tipo node=10
         :return: l'oggetto nodo
         """
         nodeClass = getattr(mod, className)
@@ -296,26 +296,26 @@ class scratchNodeV0_9(QMainWindow):
             le dimensioni (Width, Height), in numero di input e output, il colore delle varie parti
             etc ect. Quando uno di questi parametri cambia nel graphicEditor viene emesso un segnale
             che viene catturato da questa funzione.
-            il segnale è del tipo: _type, value
+            il segnale è del tipo: _type, node
             dove _type è il tipo può essere Widht, Height, InputNumber, OutputNumber, ColorTrain
-            e value è il valore del parametro.
+            e node è il valore del parametro.
 
         ENG:
             In the graphicEditor it is possible to change the appearance of the node, in particular
             the dimensions (Width, Height), the number of inputs and outputs, the color of the various parts
             etc etc. When one of these parameters changes in the graphicEditor a signal is emitted
             that is captured by this function.
-            the signal is of the type: _type, value
+            the signal is of the type: _type, node
             where _type is the type can be Widht, Height, InputNumber, OutputNumber, ColorTrain
-            and value is the value of the parameter.
+            and node is the node of the parameter.
 
         ITA:
             Una volta intercettato il segnale, viene aggiornato il codice del nodo nel codeEditor.
-            quindi se type è width e value è 100, il codice del nodo sarà aggiornato:
+            quindi se type è width e node è 100, il codice del nodo sarà aggiornato:
 
         ENG:
             Once the signal is intercepted, the code of the node in the codeEditor is updated.
-            so if type is width and value is 100, the node code will be updated:
+            so if type is width and node is 100, the node code will be updated:
 
         class UntitledNode(AbstractNodeData):
 
@@ -325,15 +325,15 @@ class scratchNodeV0_9(QMainWindow):
             height = 50 <--- aggiornato il valore
             colorTrain = [] <--- aggiornato il valore
 
-            def __init__(self, value, inNum=1, outNum=1): <--- aggiornato il valore inNum e outNum
+            def __init__(self, node, inNum=1, outNum=1): <--- aggiornato il valore inNum e outNum
                 super().__init__(inNum, outNum)
-                self.resetValue = value
-                self.changeValue(value, type(value), 0, True)
+                self.resetValue = node
+                self.changeValue(node, type(node), 0, True)
 
         :return:
         """
         code = self.codeEditor.getCode()
-        # print(f"Debuf from class {self.__class__.__name__} {_type} {value} ")
+        # print(f"Debuf from class {self.__class__.__name__} {_type} {node} ")
         if _type == "Width":
             pattern = r"width = \d+"
             self.seekAndReplace(pattern, "width", self.oldWidthString, self.replaceWithCount, value)
@@ -364,7 +364,7 @@ class scratchNodeV0_9(QMainWindow):
             Per farlo usa la regex pattern, che è una stringa che contiene la regex da cercare. Se la regex
             non viene trovata viene lanciata un'eccezione. Se la regex viene trovata, viene sostituita
             la stringa con la nuova stringa. La nuova stringa è formata da string, che è il nome della variabile
-            e value, che è il valore della variabile. Se la stringa è inNum o outNum, la stringa non viene
+            e node, che è il valore della variabile. Se la stringa è inNum o outNum, la stringa non viene
             formattata con gli spazi prima e dopo il =. Se invece la stringa non è inNum o outNum, la stringa
             viene formattata con gli spazi prima e dopo il =.
 
@@ -373,7 +373,7 @@ class scratchNodeV0_9(QMainWindow):
             To do this it uses the regex pattern, which is a string that contains the regex to search for. If the regex
             is not found an exception is raised. If the regex is found, the string is replaced
             the string with the new string. The new string is formed by string, which is the name of the variable
-            and value, which is the value of the variable. If the string is inNum or outNum, the string is not
+            and node, which is the node of the variable. If the string is inNum or outNum, the string is not
             formatted with spaces before and after the =. If the string is not inNum or outNum, the string
             is formatted with spaces before and after the =.
 

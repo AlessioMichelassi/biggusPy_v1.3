@@ -47,7 +47,7 @@ class ListNode(AbstractNodeInterface):
                 try:
                     result = valueList.remove(value)
                 except ValueError:
-                    result = "value not in list"
+                    result = "node not in list"
             elif self.menuReturnValue == "index":
                 value = self.inPlugs[1].getValue()
                 try:

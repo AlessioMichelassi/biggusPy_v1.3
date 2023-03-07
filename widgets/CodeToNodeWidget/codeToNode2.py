@@ -9,6 +9,9 @@ class CodeToNode:
     lastWhileNode = None
     code = None
     functionNodeList = []
+    copied_functions = {}
+    callNodeList = []
+
     def __init__(self, canvas):
         self.canvas = canvas
 
@@ -40,11 +43,25 @@ class CodeToNode:
         # parse the code into an AST
         return ast.parse(_code)
 
+    def removeCodeAndRestart(self, node):
+        code = ast.get_source_segment(self.code, node).strip()
+        self.code = self.code.replace(code, "")
+        self.createNodeFromCode(self.code)
+
     def nodeSearch(self, parsedCode: ast.AST):
+        function_nodes = []
         for node in ast.walk(parsedCode):
+            print(f"actual code Parsing: {node.__class__.__name__}")
+            try:
+                print(f"actual code: {ast.get_source_segment(self.code, node).strip()}")
+            except Exception as e:
+                a = e
+
             if isinstance(node, ast.FunctionDef):
-                self.createFunctionNode(node)
-                break
+                fn = self.createFunctionNode(node)
+                function_nodes.append(fn)
+                self.removeCodeAndRestart(node)
+
             elif isinstance(node, ast.For):
                 print("For")
             elif isinstance(node, ast.If):
@@ -62,7 +79,13 @@ class CodeToNode:
             elif isinstance(node, ast.Assign):
                 for target in node.targets:
                     if isinstance(target, ast.Name):
-                        self.createVariableNode(target.id, node.value)
+                        print(f"target: {target.id} = {node.value} {node.value.__class__.__name__}")
+                        variable = self.createVariableNode(target.id, node.value)
+                        print(f"variable: {variable} {variable.__class__.__name__}")
+                        for function in function_nodes:
+                            if function is not None and variable is not None:
+                                if function.getName() == variable.getName():
+                                    self.copyFunction(node, function, variable)
 
     def setNodePosition(self):
         pass
@@ -75,42 +98,42 @@ class CodeToNode:
         ITA:
             Crea un nodo per la variabile in base al tipo di valore assegnato
         ENG:
-            Create a node for the variable based on the type of value assigned
+            Create a node for the variable based on the type of node assigned
         :param name:
         :param value:
         :return:
         """
-        node = []
+        node = None
         # ast.Num sono i numeri
         if isinstance(value, ast.Num):
-            node.append(self.returnBiggusPyNode("NumberNode", value.n, name))
+            node = self.returnBiggusPyNode("NumberNode", value.n, name)
         # ast.Str sono le stringhe
         elif isinstance(value, ast.Str):
-            node.append(self.returnBiggusPyNode("StringNode", value.s, name))
+            node = self.returnBiggusPyNode("StringNode", value.s, name)
         # ast.List sono le liste
         elif isinstance(value, ast.List):
-            node.append(self.returnBiggusPyNodeWithElements("ListNode", value, name))
+            node = self.returnBiggusPyNodeWithElements("ListNode", value, name)
         # ast.Tuple sono le tuple
         elif isinstance(value, ast.Tuple):
-            node.append(self.returnBiggusPyNodeWithElements("TupleNode", value, name))
+            node = self.returnBiggusPyNodeWithElements("TupleNode", value, name)
         # ast.Dict sono i dizionari
         elif isinstance(value, ast.Dict):
-            node.append(self.returnBiggusPyNodeDictionary("DictNode", value, name))
+            node = self.returnBiggusPyNodeDictionary("DictionaryNode", value, name)
         # ast.Name sono le variabili
         elif isinstance(value, ast.Name):
-            node.append(self.returnBiggusPyNode("VariableNode", value.id, name))
+            node = self.returnBiggusPyNode("VariableNode", value.id, name)
         # ast.Attribute sono gli attributi tipo self.var o
         elif isinstance(value, ast.Attribute):
-            pass
+            print(f"Fount attribute {value} but AttributeNode is not implemented yet")
         # ast.Call sono le chiamate a funzioni tipo print()
         elif isinstance(value, ast.Call):
-            pass
+            node = self.createCallNode(value)
         # ast.BinOp sono le operazioni binarie tipo 1 + 1
         elif isinstance(value, ast.BinOp):
-            self.createBinOpNode(value, name)
-
+            node = self.createBinOpNode(value, name)
         else:
-            self.searchForOtherTypes(value, name)
+            print(f"Non ho trovato il tipo {type(value)}")
+        return node
 
     def searchForOtherTypes(self, value, name):
         # sourcery skip: guard, merge-duplicate-blocks, remove-empty-nested-block, remove-pass-elif, remove-redundant-if
@@ -161,7 +184,7 @@ class CodeToNode:
         :return:
         """
         elements = [el.value for el in value.elts]
-        # elements = [el.n if isinstance(el, ast.Num) else el.value for el in value.elts]
+        # elements = [el.n if isinstance(el, ast.Num) else el.node for el in node.elts]
         node = self.canvas.createNode(className, elements)
         if node is not None:
             node.setName(name)
@@ -177,7 +200,7 @@ class CodeToNode:
     def returnBiggusPyNodeDictionary(self, className: str, value, name):
         """
         ITA:
-            nel caso di un dizionario una volta trovati key e value, poiche sono due liste,
+            nel caso di un dizionario una volta trovati key e node, poiche sono due liste,
             vengono convertiti in un dizionario.
         ENG:
             in the case of a dictionary once keys and values are found, because they are two lists,
@@ -202,6 +225,9 @@ class CodeToNode:
         else:
             print("WARNING: Node not created")
             return None
+
+    def returnCallNode(self, value):
+        print(f"Found call {value} but CallNode is not implemented yet")
 
     # ---------------    BINOP NODE    ----------------
     """
@@ -238,7 +264,7 @@ class CodeToNode:
         """
         if isinstance(value, ast.Add):
             return "+"
-        elif isinstance(value, (ast.Sub, ast.Subtract)):
+        elif isinstance(value, ast.Sub):
             return "-"
         elif isinstance(value, ast.Mult):
             return "*"
@@ -265,7 +291,7 @@ class CodeToNode:
         else:
             return None
 
-    def createBinOpNode(self, value, name):
+    def createBinOpNode(self, node, name):
         """
         ITA:
             Questo metodo viene chiamato quando viene trovato un nodo di tipo BinOp,
@@ -280,12 +306,14 @@ class CodeToNode:
             Depending on the type of variable that is assigned, a different type node is created.
             For example if a = "Hello" and b = "World" in python the result is "HelloWorld"
             but in biggus py to do it a StringNode type node is needed, so a StringNode type node is created.
-        :param value:
+        :param node:
         :param name:
         :return:
         """
-        assignmentVariable = self.returnBiggusPyNode("VariableNode", value, name)
-        operator = self.returnOperator(value.op)
+        code = ast.get_source_segment(self.code, node).strip()
+        print(f"\ncreate BinNode with code:\n {code}\n")
+        assignmentVariable = self.returnBiggusPyNode("VariableNode", node, name)
+        operator = self.returnOperator(node.op)
         if assignmentVariable is None:
             print("WARNING: assignmentVariable is None")
             return None
@@ -293,11 +321,12 @@ class CodeToNode:
             print("WARNING: operator is None")
             return None
         opNode = None
-        left = value.left
-        right = value.right
-        opNode = self.searchWhichNodeToCreate(left, right, operator, value, name)
+        left = node.left
+        right = node.right
+        opNode = self.searchWhichNodeToCreate(left, right, operator, node, name)
         print(f"opNode: {str(opNode)}")
         self.checkIfLeftAndRightVariablesExist(left, right, opNode, assignmentVariable, name)
+        return opNode
 
     def returnType(self, value):
         """
@@ -440,12 +469,14 @@ class CodeToNode:
         return None
 
     def createIfNode(self, node):
+        code = ast.get_source_segment(self.code, node).strip()
+        print(f"\ncreate IfNode with code:\n {code}\n")
         operator = self.returnIfOperator(left=node.test.left, right=node.test.comparators[0], value=node.test)
         ifNode = self.returnBiggusPyNode("IfNode", True, "IfNode")
         ifNode.setOperator(operator)
         # scrivendo print(ast.dump(node)) ottengo: If(test=Compare(left=Name(id='b', ctx=Load()), ops=[Gt()],
-        # comparators=[Name(id='a', ctx=Load())]), body=[Expr( value=Call(func=Name(id='print', ctx=Load()),
-        # args=[Constant(value='b is greater than a')], keywords=[]))], orelse=[])
+        # comparators=[Name(id='a', ctx=Load())]), body=[Expr( node=Call(func=Name(id='print', ctx=Load()),
+        # args=[Constant(node='b is greater than a')], keywords=[]))], orelse=[])
         leftNode = node.test.left
         arg1 = self.canvas.getNodeByName(leftNode.id)
         arg2 = self.canvas.getNodeByName(node.test.comparators[0].id)
@@ -455,6 +486,9 @@ class CodeToNode:
             self.createConnection(arg1, ifNode)
             self.createConnection(arg2, ifNode)
 
+        self.createIfBodyNode(node, ifNode)
+
+    def createIfBodyNode(self, node, ifNode):
         body = node.body
         # ora devo creare i nodi per il corpo dell'if, per farlo devo creare un nodo per ogni istruzione
 
@@ -518,17 +552,34 @@ class CodeToNode:
 
     def createFunctionNode(self, node):
         code = ast.get_source_segment(self.code, node).strip()
-        self.code = self.code.replace(code, "")
+        print(f"\ncreate FunctionNode with code:\n {code}\n")
         # deve saltare l'intestazione def...
         functionNode = self.returnBiggusPyNode("FunctionNode", code, "FunctionNode")
         self.functionNodeList.append(functionNode)
         functionNode.setName(node.name)
         self.lastFunctionNode = functionNode
-        self.createNodeFromCode(self.code)
+        return functionNode
+
+    def copyFunction(self, node, function, variable):
+        function = function.clone()
+        function.getName()
+        code = function.functionString
+        inNum = len(function.inPlugs)
+        outNum = len(function.outPlugs)
+        functionNode = self.canvas.createNode("FunctionNode", code, inNum, outNum)
+
+        functionNode.setName(function.getName())
+        self.canvas.addNode(functionNode)
+        return functionNode
 
     # ------------------ CALL NODE ------------------
 
     def createCallNode(self, node):
+        try:
+            code = ast.get_source_segment(self.code, node).strip()
+            print(f"\ncreateCallNode: {node.func.id} with code:\n {code}\n")
+        except:
+            pass
         # cerca se il nodo è già stato creato
         callNode = self.canvas.getNodeByName(node.func.id)
         if callNode is None:
@@ -542,12 +593,14 @@ class CodeToNode:
                     if argNode is not None:
                         self.callNodePosition(argNode, callNode)
                         self.createConnection(argNode, callNode)
+                    else:
+                        print(f"argNode {arg.id} is None")
+        return callNode
 
     def callNodePosition(self, argNode, callNode):
         x = argNode.getPos().x() + argNode.getWidth() * 2
         y = argNode.getPos().y()
         self.updateNodePosition(callNode, x, y)
-
 
     # ------------------ NODE POSITIONING ------------------
 
@@ -591,4 +644,3 @@ class CodeToNode:
                 break
             plugIndex += 1
         self.canvas.addConnection(node2, plugIndex, node1, 0)
-

@@ -11,7 +11,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 class WhileNode(AbstractNodeInterface):
     resetValue = []
-    startFunction = "value = 0    def doThis():    value += 1    print(f'value from function {value}')"
+    startFunction = "node = 0    def doThis():    node += 1    print(f'node from function {node}')"
     width = 120
     height = 80
     colorTrain = [QColor(184, 204, 236), QColor(252, 104, 95), QColor(178, 218, 131), QColor(130, 177, 107),

@@ -41,7 +41,7 @@ Inoltre è possibile cambiare il numero di Input, il numero di output, il colore
 la dimensione del nodo, etc etc.
 
 ENG:
-In itself a node does nothing special, except take a value as input
+In itself a node does nothing special, except take a node as input
 and return it as output.
 
 The node can be modified to do something special, for example
@@ -65,7 +65,7 @@ class AbstractNodeInterface:
     canvas = None
     mainWidget = None
     _isNodeCreated = False
-    # this variable is used to set the value of the plug to check the compatibility
+    # this variable is used to set the node of the plug to check the compatibility
     valueType = int
 
     def __init__(self, value=220, inNum=1, outNum=1, parent=None):
@@ -195,13 +195,13 @@ class AbstractNodeInterface:
                 value = int(value)
                 self.changeInputValue(0, value)
             except ValueError:
-                print("ValueError: the value is not an integer")
+                print("ValueError: the node is not an integer")
         elif self.nodeData.inPlugs[0].valueType == float:
             try:
                 value = float(value)
                 self.changeInputValue(0, value)
             except ValueError:
-                print("ValueError: the value is not a float")
+                print("ValueError: the node is not a float")
         else:
             self.changeInputValue(0, value)
         self.nodeGraphic.updateTxtValuePosition()
@@ -244,12 +244,12 @@ class AbstractNodeInterface:
             self.nodeGraphic.setTextValueOnQLineEdit(self.getOutputValue(0))
         except Exception as e:
             """print(f"Debug: class AbstractNodeInterface, function setInputValue, error: {e}"
-                  f"\nplugIndex: {plugIndex}, value: {value}, isAResetValue: {isAResetValue} ")"""
+                  f"\nplugIndex: {plugIndex}, node: {node}, isAResetValue: {isAResetValue} ")"""
             a = e
 
     def calculateOutput(self, plugIndex):
         """
-        Override this function to calculate the output value
+        Override this function to calculate the output node
         :param plugIndex:
         :return:
         """
@@ -267,10 +267,10 @@ class AbstractNodeInterface:
             Questa funzione viene chiamata quando un plug di input viene modificato durante
             l'inizializzazione del nodo o quando un plug di output viene ricalcolato.
         ENG:
-            Change the value of an input plug.
+            Change the node of an input plug.
             This function is called when an input plug is modified during
             the initialization of the node or when an output plug is recalculated.
-        :param isAResetValue: if True, the value is a reset value, comes handy when you want disconnect the node
+        :param isAResetValue: if True, the node is a reset node, comes handy when you want disconnect the node
         :param plugIndex:
         :param value:
         :return:
@@ -391,7 +391,7 @@ class AbstractNodeInterface:
             ('name', self.getName()),
             ('title', self.nodeData.getTitle()),
             ('index', self.index),
-            ('value', self.nodeData.inPlugs[0].getValue()),
+            ('node', self.nodeData.inPlugs[0].getValue()),
             ('pos', (int(self.nodeGraphic.pos().x()), int(self.nodeGraphic.pos().y()))),
             ('inPlugsNumb', len(self.inPlugs)),
             ('outPlugsNumb', len(self.outPlugs)),

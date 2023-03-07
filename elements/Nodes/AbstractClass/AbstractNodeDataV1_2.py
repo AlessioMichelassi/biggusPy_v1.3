@@ -52,13 +52,13 @@ class AbstractNodeData:
             Questa funzione viene chiamata quando un plug di input viene modificato durante
             l'inizializzazione del nodo o quando un plug di output viene ricalcolato.
         ENG:
-            Change the value of an input plug.
+            Change the node of an input plug.
             This function is called when an input plug is modified during
             the initialization of the node or when an output plug is recalculated.
-        :param value: a value like 10 or "hello"
+        :param value: a node like 10 or "hello"
         :param index: plug index
-        :param isAResetValue: This value is used to reset the value of the plug. Comes handy to set a
-                                default value for a plug when is created or disconnected.
+        :param isAResetValue: This node is used to reset the node of the plug. Comes handy to set a
+                                default node for a plug when is created or disconnected.
         :return:
         """
         if isAResetValue:
@@ -71,7 +71,7 @@ class AbstractNodeData:
 
     def calculate(self):
         """
-            For every output plug, calculate the return value
+            For every output plug, calculate the return node
         :return:
         """
         for i in range(len(self.outPlugs)):

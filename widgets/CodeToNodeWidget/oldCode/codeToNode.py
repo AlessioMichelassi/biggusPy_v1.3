@@ -60,11 +60,11 @@ class CodeToNode:
         """
         ITA:
             Crea un nodo per la variabile in base al tipo di valore assegnato
-            target.id è il nome della variabile, mentre node.value è il valore assegnato
+            target.id è il nome della variabile, mentre node.node è il valore assegnato
             in target si trova questi dati:
             ast.Assign(targets=[ast.Name(id='a', ctx=ast.Store())],
         ENG:
-            Create a node for the variable based on the type of value assigned
+            Create a node for the variable based on the type of node assigned
         :param name: is the name of the variable and is from the ast.Name
         :param value: came from the ast.Assign
         :param prev_node:

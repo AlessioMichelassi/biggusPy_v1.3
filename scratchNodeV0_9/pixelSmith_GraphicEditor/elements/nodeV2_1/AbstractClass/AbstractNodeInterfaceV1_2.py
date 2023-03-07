@@ -133,12 +133,12 @@ class AbstractNodeInterface:
                     connection.updateValue()
         except Exception as e:
             """print(f"Debug: class AbstractNodeInterface, function setInputValue, error: {e}"
-                  f"\nplugIndex: {plugIndex}, value: {value}, isAResetValue: {isAResetValue} ")"""
+                  f"\nplugIndex: {plugIndex}, node: {node}, isAResetValue: {isAResetValue} ")"""
             a = e
 
     def calculateOutput(self, plugIndex):
         """
-        Override this function to calculate the output value
+        Override this function to calculate the output node
         :param plugIndex:
         :return:
         """

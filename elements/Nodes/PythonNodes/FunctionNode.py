@@ -178,3 +178,10 @@ class FunctionNode(AbstractNodeInterface):
         self.functionWidget.move(int(width // 2 - self.functionWidget.width() // 2),
                                  int(height // 2 - self.functionWidget.height() // 2) + 20)
         self.isProxied = True
+
+    def clone(self):
+        inNum = len(self.inPlugs)
+        outNum = len(self.outPlugs)
+        resetValue = self.functionString
+        return FunctionNode(resetValue, inNum, outNum)
+

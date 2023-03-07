@@ -28,12 +28,27 @@ def SieveOfEratosthenes(n):
 
 codeComplex1 = '''
 def printValues(values):
-    for value in values:
-        print(value)
+    for node in values:
+        print(node)
 
 numberNode = 6
 values = [1, 2, 3, 4, 5]
 printValues(values)'''
+
+codeComplex2 = """
+def add_and_multiply(a, b, c):
+    d = a + b
+    e = d * c
+    return e
+
+x = add_and_multiply(1, 2, 3)
+"""
+"""
+y = add_and_multiply(4, 5, 6)
+
+z = x + y
+print(z)
+"""
 
 class Canvas(QWidget):
     node_name_list = ["NumberNode", "StringNode", "ListNode", "DictionaryNode", "MathNode",
@@ -130,8 +145,8 @@ class Canvas(QWidget):
             then it returns the node interface. In args and kwargs you have to pass the parameters
             as Value, Name, InputNumber, OutputNumber etc ...
         :param className: class name of the node
-        :param args:  value, name, inputNumber, outputNumber etc...
-        :param kwargs:  value, name, inputNumber, outputNumber etc...
+        :param args:  node, name, inputNumber, outputNumber etc...
+        :param kwargs:  node, name, inputNumber, outputNumber etc...
         :return:
         """
         module = None
@@ -149,7 +164,7 @@ class Canvas(QWidget):
         try:
             if nodeClass:
                 node = nodeClass(*args, **kwargs)
-                value = kwargs.get("value", node.resetValue)
+                value = kwargs.get("node", node.resetValue)
                 if value:
                     node.resetValue = value
                 return node
@@ -355,7 +370,7 @@ class Canvas(QWidget):
         _title = deserialized["title"]
         _index = deserialized["index"]
         _pos = deserialized["pos"]
-        _value = int(deserialized["value"])
+        _value = int(deserialized["node"])
         _inPlugsNumb = deserialized["inPlugsNumb"]
         _outPlugsNumb = deserialized["outPlugsNumb"]
         # se viene specificata la posizione, aumenta la pos corrente

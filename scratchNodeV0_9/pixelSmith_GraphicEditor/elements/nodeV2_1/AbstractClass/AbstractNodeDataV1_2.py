@@ -55,7 +55,7 @@ class AbstractNodeData:
 
     def calculate(self):
         """
-            For every output plug, calculate the return value
+            For every output plug, calculate the return node
         :return:
         """
         for i in range(len(self.outPlugs)):

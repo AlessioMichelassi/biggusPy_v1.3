@@ -272,7 +272,7 @@ class nodePropertyEditor(QWidget):
         """
         Slot che viene chiamato quando cambia il valore di uno slider imposta il valore
         nella lineTxt corrispondente.
-        :param value: valore dello slider
+        :param node: valore dello slider
         :return:
         """
         if self.sender() == self.sldWidth:
@@ -287,7 +287,7 @@ class nodePropertyEditor(QWidget):
     def onLineTxtValueChanged(self):
         """
         Slot che viene chiamato quando cambia il valore di una lineTxt imposta il valore
-        :param value:
+        :param node:
         :return:
         """
         sender = self.sender()

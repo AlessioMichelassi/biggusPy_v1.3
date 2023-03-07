@@ -32,7 +32,7 @@ class NumberNode(AbstractNodeInterface):
 
     def showContextMenu(self, position):
         contextMenu = QMenu()
-        contextMenu.addSection("set value")
+        contextMenu.addSection("set node")
         actionRandomInt = contextMenu.addAction("random int")
         actionRandomFloat = contextMenu.addAction("random float")
         actionPI = contextMenu.addAction("pi")

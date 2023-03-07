@@ -45,17 +45,17 @@ class TupleNode(AbstractNodeInterface):
             try:
                 result.remove(value)
             except KeyError:
-                result = "value not in set"
+                result = "node not in set"
             except TypeError:
-                result = "value must be hashable"
+                result = "node must be hashable"
         elif self.menuReturnValue == "discard":
             value = self.inPlugs[1].getValue()
             try:
                 result.discard(value)
             except KeyError:
-                result = "value not in set"
+                result = "node not in set"
             except TypeError:
-                result = "value must be hashable"
+                result = "node must be hashable"
         elif self.menuReturnValue == "pop":
             try:
                 result.pop()
