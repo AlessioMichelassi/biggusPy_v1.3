@@ -14,7 +14,7 @@ from elements.object.resizableRectangle import ResizableRectangle
 from graphicEngine.GraphicSceneOverride import GraphicSceneOverride
 from graphicEngine.graphicViewOverride import GraphicViewOverride
 
-from widgets.CodeToNodeWidget.codeToNode2 import CodeToNode
+from widgets.CodeToNodeWidget.codeToNode2 import CodeToNodeWidget
 
 code2 = '''
 a = 80
@@ -291,7 +291,7 @@ class Canvas(QWidget):
         :return: list of nodes
         """
         # test codeToNode
-        codeToNode = CodeToNode(self)
+        # codeToNode = CodeToNode(self)
         codexxx2 = '''def SieveOfEratosthenes(n):
                                 prime_list = []
                                 for i in range(2, n+1):
@@ -310,7 +310,10 @@ class Canvas(QWidget):
         codeString = """a = "Hello, World!"\nb = "Hello, World!"\nc = a + b"""
         codeIf = """a = 33\nb = 200\nif b > a:\n  print("b is greater than a")"""
         code = f"""{codeTuple}\n{codeList}\n{codeSet}\n{codeDict}"""
-        codeToNode.createNodeFromCode(codeComplex2)
+        # codeToNode.createNodeFromCode(codeComplex2)
+        codeToNode = CodeToNodeWidget(self)
+        codeToNode.setParent(self)  # Imposta il padre come il widget corrente (Canvas)
+        codeToNode.show()
         self.graphicView.selectAllCenterSceneAndDeselect()
 
     def createNodeFromCodeToNode(self, className, *args, **kwargs):

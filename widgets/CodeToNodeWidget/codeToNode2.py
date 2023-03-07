@@ -1,9 +1,27 @@
 import ast
 
-from PyQt5.QtCore import QPointF
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+class txtWidget(QPlainTextEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def contextMenuEvent(self, event) -> None:
+        menu = QMenu(self)
+        menu.addSection("getNode! Context Menu")
+        _updateFunction = menu.addAction("getNode!")
+        menu.addSeparator()
+        action = menu.exec(self.mapToGlobal(event.pos()))
+        if action == _updateFunction:
+            self.parent().createNodeFromCode(self.toPlainText())
+            self.parent().canvas.graphicView.selectAllCenterSceneAndDeselect()
+            self.parent().close()
 
 
-class CodeToNode:
+class CodeToNodeWidget(QWidget):
+    argue: QPlainTextEdit
     lastNode = None
     lastIfNode = None
     lastForNode = None
@@ -15,11 +33,28 @@ class CodeToNode:
     callNodeList = []
     variableForCallNode = []
     callingIndex = 0
-
+    allNodes = []
     appendPositioningFunction = []
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, parent=None):
+        super().__init__(parent)
         self.canvas = canvas
+        self.setGeometry(0, 0, 500, 500)
+        self.layout = QVBoxLayout()
+        self.argue = txtWidget("...")
+        self.layout.addWidget(self.argue)
+        self.setLayout(self.layout)
+
+        self.show()
+
+    def contextMenuEvent(self, event) -> None:
+        menu = QMenu(self)
+        menu.addSection("getNode! Context Menu")
+        _updateFunction = menu.addAction("getNode!")
+        menu.addSeparator()
+        action = menu.exec(self.mapToGlobal(event.pos()))
+        if action == _updateFunction:
+            self.createNodeFromCode(self.argue.toPlainText())
 
     def createNodeFromCode(self, _code: str):
         """
@@ -43,14 +78,7 @@ class CodeToNode:
         self.nodeSearch(parsedCode)
         self.setNodePosition()
         self.createConnections()
-        if self.appendPositioningFunction:
-            for function in self.appendPositioningFunction:
-                try:
-                    function()
-                except Exception as e:
-                    print("Error from CodeToNode.createNodeFromCode: ")
-                    print(f"function: {function}")
-                    print(e)
+        self.searchUnpositionNodes()
 
     @staticmethod
     def parseCode(_code: str):
@@ -82,7 +110,8 @@ class CodeToNode:
             elif isinstance(node, ast.Call):
                 try:
                     if isinstance(node.func, ast.Name):
-                        print(f"debug: {node.func.id} {node.func.__class__.__name__} {node.func.__dict__} {node.func.__class__.__dict__}")
+                        print(
+                            f"debug: {node.func.id} {node.func.__class__.__name__} {node.func.__dict__} {node.func.__class__.__dict__}")
                         self.createCallNode(node)
                     elif isinstance(node.func, ast.Attribute):
                         self.createCallNode(node)
@@ -173,6 +202,7 @@ class CodeToNode:
         if node is not None:
             node.setName(name)
             self.canvas.addNode(node)
+            self.allNodes.append(node)
             if self.lastNode is not None:
                 self.updateNodePositionByLastNode(node)
             self.lastNode = node
@@ -197,6 +227,7 @@ class CodeToNode:
         if node is not None:
             node.setName(name)
             self.canvas.addNode(node)
+            self.allNodes.append(node)
             if self.lastNode is not None:
                 self.updateNodePositionByLastNode(node)
             self.lastNode = node
@@ -342,7 +373,7 @@ class CodeToNode:
                 rightVariable = self.canvas.getNodeByName(right.id)
                 if rightVariable is not None:
                     opNode = self.returnBiggusPyNode("MathNode", node, name)
-                    self.appendPositioningFunction.append(self.checkPositionForFunctionNext(leftVariable, rightVariable, opNode, assignmentVariable, name))
+                    self.checkPositionForFunctionNext(leftVariable, rightVariable, opNode, assignmentVariable)
                     return opNode
 
     def returnType(self, value):
@@ -645,7 +676,7 @@ class CodeToNode:
         self.updateNodePosition(callNode, x, y)
 
     def setConstantArgsPosition(self, constantArgs, callNode):
-        x = (constantArgs[0].getPos().x() + constantArgs[0].getWidth()) * 2*(len(constantArgs)-1)
+        x = (constantArgs[0].getPos().x() + constantArgs[0].getWidth()) * 2 * (len(constantArgs) - 1)
         y = (constantArgs[0].getPos().y() + constantArgs[-1].getPos().y()) // 2
         callNode.setPos(QPointF(x, y))
         if len(self.variableForCallNode) > self.callingIndex:
@@ -655,7 +686,7 @@ class CodeToNode:
             self.createConnection(callNode, self.variableForCallNode[self.callingIndex])
             self.callingIndex += 1
 
-    def checkPositionForFunctionNext(self, left, right, opNode, assignmentVariable, name):
+    def checkPositionForFunctionNext(self, left, right, opNode, assignmentVariable):
         x = (left.getPos().x() + right.getPos().x()) * 40
         y = (left.getPos().y() + right.getPos().y()) // 2
         opNode.setPos(QPointF(x, y))
@@ -698,6 +729,21 @@ class CodeToNode:
         x = self.lastNode.getPos().x()
         y = self.lastNode.getPos().y() + self.lastNode.getHeight() * 2
         self.updateNodePosition(node, x, y)
+
+    def searchUnpositionNodes(self):
+        # se un nodo ha una in connection posiziona il nodo a destra
+        for connection in self.canvas.connections:
+            outNode = connection.outputNode
+            inNode = connection.inputNode
+            if inNode.nodeInterface.getPos().x() < outNode.nodeInterface.getPos().x():
+                x = outNode.nodeInterface.getPos().x() + outNode.nodeInterface.getWidth() * 2
+                y = outNode.nodeInterface.getPos().y() + outNode.nodeInterface.getHeight() // 2
+                if len(inNode.inPlugs) > 1:
+                    # cerca se il nodo ha altre connessioni in entrata
+                    for conn in self.canvas.connections:
+                        if conn.inputNode == inNode:
+                            y += inNode.nodeInterface.getHeight() * 1.5
+                self.updateNodePosition(inNode.nodeInterface, x, y)
 
     # ------------------ NODE CONNECTION ------------------
 
