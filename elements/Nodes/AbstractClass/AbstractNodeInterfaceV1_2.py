@@ -3,6 +3,7 @@ import json
 from collections import OrderedDict
 
 from PyQt5.QtCore import QPointF
+from PyQt5.QtWidgets import QWidget
 
 from elements.Nodes.AbstractClass.AbstractNodeDataV1_2 import AbstractNodeData
 from elements.Nodes.AbstractClass.AbstractNodeGraphicV1_2 import AbstractNodeGraphic
@@ -58,6 +59,7 @@ the size of the node, etc etc.
 
 class AbstractNodeInterface:
     colorTrain = []
+    toolWidget: QWidget = None
     isDisabled = False
     contextMenu = None
     resetValue = 0
@@ -65,6 +67,7 @@ class AbstractNodeInterface:
     canvas = None
     mainWidget = None
     _isNodeCreated = False
+    hasAToolWidget = False
     # this variable is used to set the node of the plug to check the compatibility
     valueType = int
 
@@ -381,6 +384,16 @@ class AbstractNodeInterface:
         :return:
         """
         pass
+
+    def showToolWidget(self):
+        """
+        Mostra il tool widget del nodo
+        :return:
+        """
+        if self.hasAToolWidget:
+            self.toolWidget.show()
+
+    # ---------------------- SERIALIZATION  --------------------------------
 
     def serialize(self):
         connections = []

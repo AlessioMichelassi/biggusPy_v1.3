@@ -247,12 +247,6 @@ class Canvas(QWidget):
         """
         nodes_folder = os.path.abspath(path)
         relative_path = os.path.relpath(nodes_folder, os.getcwd())
-        # nel caso la path sia:
-        # r"/home/tedk/Desktop/python/biggusPy_v1.3/elements/Nodes/PythonNodes"
-        # relative_path = "elements/Nodes/PythonNodes"
-        # nodeType = "PythonNodes"
-        # il modulo da importare è:
-        # elemts.Nodes.PythonNodes.ClassName
         moduleName = f"{relative_path.replace('/', '.')}.{className}"
         module = None
         nodeClass = None
@@ -272,7 +266,6 @@ class Canvas(QWidget):
                 value = kwargs.get("node", node.resetValue)
                 if value:
                     node.resetValue = value
-
                 return node
         except Exception as e:
             print(f"Error in createNode: {className} {e}")

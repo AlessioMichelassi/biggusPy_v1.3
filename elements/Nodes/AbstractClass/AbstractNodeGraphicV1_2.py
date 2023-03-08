@@ -254,6 +254,9 @@ class AbstractNodeGraphic(QGraphicsItem):
     def contextMenuEvent(self, event):
         self.nodeInterface.showContextMenu(event.screenPos())
 
+    def mouseDoubleClickEvent(self, event):
+        self.nodeInterface.showToolWidget()
+
     # ##########################################
     #
     #                Look & Feel
@@ -520,7 +523,8 @@ class AbstractNodeGraphic(QGraphicsItem):
     #
 
     def createProxyWidget(self, widget):
-        self.proxyWidget = QGraphicsProxyWidget(self)
+        self.proxyWidget = QGraphicsProxyWidget(self, Qt.WindowFlags())
+        self.proxyWidget.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self.proxyWidget.setZValue(2)
         self.proxyWidget.setWidget(widget)
         self.txtValueProxy.hide()

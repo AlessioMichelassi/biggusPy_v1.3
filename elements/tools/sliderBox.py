@@ -62,6 +62,7 @@ class sliderBox(QWidget):
         border-radius: 3px;
         color: white;
     }}"""
+    valueChanged = pyqtSignal(int)
 
     def __init__(self, name, value=None, parent=None):
         super().__init__(parent)
@@ -128,6 +129,7 @@ class sliderBox(QWidget):
 
     def onSliderChanged(self, value):
         self.txtValue.setText(str(value))
+        self.valueChanged.emit(value)
 
     def onTextChanged(self):
         value = self.txtValue.text()

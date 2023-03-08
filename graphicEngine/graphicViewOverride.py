@@ -47,6 +47,22 @@ class GraphicViewOverride(QGraphicsView):
     #
     #               Mouse Override
     #
+    def mouseDoubleClickEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            # determina se il doppio click è avvenuto all'interno del nodo
+            pos = event.pos()
+            if self.selectedItem is not None:
+                if isinstance(self.selectedItem, AbstractNodeGraphic):
+                    self.selectedItem.mouseDoubleClickEvent(event)
+                elif isinstance(self.selectedItem, QGraphicsProxyWidget):
+                    try:
+                        self.selectedItem.widget().showToolBox(self.mapToScene(event.pos()) )
+                    except AttributeError as e:
+                        print(e)
+                super().mouseDoubleClickEvent(event)
+            else:
+                print("double click outside a node")
+        super().mouseDoubleClickEvent(event)
 
     def wheelEvent(self, event):
         # sourcery skip: assign-if-exp
