@@ -13,8 +13,8 @@ class toolz(QWidget):
     sld1: sliderBox
     sld2: sliderBox
 
-    radiusChange = pyqtSignal(int)
-    sigmaChange = pyqtSignal(int)
+    radiusChange = pyqtSignal(str)
+    sigmaChange = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent, Qt.WindowType.Window)
@@ -30,10 +30,10 @@ class toolz(QWidget):
         self.sld2.valueChanged.connect(self.onSigmaChange)
 
     def onRadiusChange(self, value):
-        self.radiusChange.emit(value)
+        self.radiusChange.emit(str(value))
 
     def onSigmaChange(self, value):
-        self.sigmaChange.emit(value)
+        self.sigmaChange.emit(str(value))
 
 
 class cmbBoxWidget(QWidget):
@@ -111,7 +111,6 @@ class BlurCvNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
 
     def doGaussian(self, image):
-        print("gaussian")
         return cv2.GaussianBlur(image, (self.radius, self.radius), self.sigma)
 
     def doMedian(self, image):
@@ -139,9 +138,15 @@ class BlurCvNode(AbstractNodeInterface):
         self.proxyWidget.toolBox.sld2.setValue(0)
 
     def onRadiusChange(self, value):
+        value = int(value)
+        if value % 2 == 0:
+            value += 1
         self.radius = value
+        print(f"Debug print from BlurCvNode: radius = {self.radius}")
         self.calculateOutput(0)
 
     def onSigmaChange(self, value):
+        value = int(value)
+
         self.sigma = value
         self.calculateOutput(0)
