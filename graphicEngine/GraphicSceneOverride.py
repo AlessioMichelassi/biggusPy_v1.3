@@ -51,7 +51,8 @@ class GraphicSceneOverride(QGraphicsScene):
             else:
                 lightGreyLines.append(QLine(_left, y, _right, y))
         painter.setPen(self._penLight)
-        painter.drawLines(*lightGreyLines)
+        if lightGreyLines:
+            painter.drawLines(*lightGreyLines)
         painter.setPen(self._penDark)
         if darkGreyLines:
             painter.drawLines(*darkGreyLines)

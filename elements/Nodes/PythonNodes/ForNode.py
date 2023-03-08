@@ -12,6 +12,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 class ForNode(AbstractNodeInterface):
     resetValue = []
     startFunction = lambda x: x
+    startValue = []
     width = 120
     height = 80
     colorTrain = [QColor(184, 204, 236), QColor(252, 104, 95), QColor(178, 218, 131), QColor(130, 177, 107),

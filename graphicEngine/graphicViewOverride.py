@@ -295,13 +295,16 @@ class GraphicViewOverride(QGraphicsView):
     #
 
     def deleteSelectedItems(self):
-        for item in self.graphicScene.selectedItems():
-            if isinstance(item, AbstractNodeGraphic):
-                self.canvas.deleteNode(item.nodeInterface)
-            elif isinstance(item, Connection):
-                self.canvas.deleteConnection(item)
-            if item in self.graphicScene.items():
-                self.graphicScene.removeItem(item)
+        try:
+            for item in self.graphicScene.selectedItems():
+                if isinstance(item, AbstractNodeGraphic):
+                    self.canvas.deleteNode(item.nodeInterface)
+                elif isinstance(item, Connection):
+                    self.canvas.deleteConnection(item)
+                if item in self.graphicScene.items():
+                    self.graphicScene.removeItem(item)
+        except Exception as e:
+            print(f"Debug From deleteSelectedItems: {e}")
 
     def disableNode(self):
         for item in self.graphicScene.selectedItems():

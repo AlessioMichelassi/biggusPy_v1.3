@@ -11,6 +11,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 class IfNode(AbstractNodeInterface):
     resetValue = True
     menuReturnValue = "=="
+    startValue = True
     width = 100
     height = 120
     colorTrain = [QColor(255, 255, 255), QColor(255, 0, 4), QColor(255, 246, 228), QColor(177, 202, 255),

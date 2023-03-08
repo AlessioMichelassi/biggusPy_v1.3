@@ -10,9 +10,10 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 class BinOpNode(AbstractNodeInterface):
     resetValue = 0
+    startValue = True
     menuReturnValue = "+"
-    width = 120
-    height = 80
+    width = 400
+    height = 250
     colorTrain = [QColor(148, 209, 178), QColor(92, 10, 50), QColor(250, 47, 200), QColor(117, 66, 246),
                   QColor(85, 230, 143), QColor(11, 39, 149), QColor(176, 103, 92), QColor(84, 255, 4), ]
 

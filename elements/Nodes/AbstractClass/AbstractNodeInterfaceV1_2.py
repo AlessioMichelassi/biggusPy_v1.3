@@ -68,7 +68,7 @@ class AbstractNodeInterface:
     # this variable is used to set the node of the plug to check the compatibility
     valueType = int
 
-    def __init__(self, value=220, inNum=1, outNum=1, parent=None):
+    def __init__(self, value=None, inNum=1, outNum=1, parent=None):
         self.nodeData = AbstractNodeData("AbstractNodeInterface", self)
         self.nodeGraphic = AbstractNodeGraphic(self)
         self.contextMenu = self.nodeGraphic.contextMenu

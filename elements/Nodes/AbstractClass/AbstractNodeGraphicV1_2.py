@@ -227,9 +227,9 @@ class AbstractNodeGraphic(QGraphicsItem):
 
     def __str__(self):
         return f"Node className: {self.nodeInterface.nodeData.className}" \
-               f" name: {self.nodeInterface.nodeData.name} index: {self.nodeInterface.nodeData.index}"\
-               f" title: {self.nodeInterface.nodeData.getTitle()}"\
-                  f" node: {self.nodeInterface.resetValue}"
+               f" name: {self.nodeInterface.nodeData.name} index: {self.nodeInterface.nodeData.index}" \
+               f" title: {self.nodeInterface.nodeData.getTitle()}" \
+               f" node: {self.nodeInterface.resetValue}"
 
     def boundingRect(self):
         return self.boundingRectangle.normalized()
@@ -513,8 +513,6 @@ class AbstractNodeGraphic(QGraphicsItem):
         for plug in plugReference:
             if "out" in plug.plugData.className.lower():
                 plug.setPos(QPointF(self.width // 2, self.height + 8))
-
-
 
     # ##########################################
     #

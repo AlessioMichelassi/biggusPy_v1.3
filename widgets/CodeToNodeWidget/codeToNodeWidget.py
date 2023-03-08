@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+
 class txtWidget(QPlainTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -45,8 +46,6 @@ class CodeToNodeWidget(QWidget):
         self.layout.addWidget(self.argue)
         self.setLayout(self.layout)
 
-        self.show()
-
     def contextMenuEvent(self, event) -> None:
         menu = QMenu(self)
         menu.addSection("getNode! Context Menu")
@@ -75,10 +74,15 @@ class CodeToNodeWidget(QWidget):
         """
         self.code = _code
         parsedCode = self.parseCode(_code)
-        self.nodeSearch(parsedCode)
-        self.setNodePosition()
-        self.createConnections()
-        self.searchUnpositionNodes()
+        try:
+            self.nodeSearch(parsedCode)
+            self.setNodePosition()
+            self.createConnections()
+            self.searchUnpositionNodes()
+        except Exception as e:
+            continue_ = QMessageBox.question(self, "Error", f"Error: {e}\nDo you want to continue?", QMessageBox.Yes | QMessageBox.No)
+            if continue_ != QMessageBox.StandardButton.Yes:
+                self.close()
 
     @staticmethod
     def parseCode(_code: str):
@@ -754,3 +758,5 @@ class CodeToNodeWidget(QWidget):
                 break
             plugIndex += 1
         self.canvas.addConnection(node2, plugIndex, node1, 0)
+
+

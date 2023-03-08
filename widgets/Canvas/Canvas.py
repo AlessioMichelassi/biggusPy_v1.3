@@ -1,5 +1,6 @@
 import importlib
 import json
+import os
 from collections import OrderedDict
 
 from PyQt5.QtCore import *
@@ -14,7 +15,8 @@ from elements.object.resizableRectangle import ResizableRectangle
 from graphicEngine.GraphicSceneOverride import GraphicSceneOverride
 from graphicEngine.graphicViewOverride import GraphicViewOverride
 
-from widgets.CodeToNodeWidget.codeToNode2 import CodeToNodeWidget
+from widgets.CodeToNodeWidget.codeToNode import CodeToNode
+from widgets.NodeFinderWidget import NodeFinderWidget
 
 code2 = '''
 a = 80
@@ -93,6 +95,8 @@ class Canvas(QWidget):
         _printNode = contextMenu.addAction("Print Node")
         _addClassNode = contextMenu.addAction("Add Class Node")
         _nodeToCode = contextMenu.addAction("codeToNode")
+        _videoPlayer = contextMenu.addAction("Video Player")
+        _videoFile = contextMenu.addAction("Video File")
         action = contextMenu.exec(self.mapToGlobal(event.pos()))
 
         if action == actionCenterObject:
@@ -117,6 +121,12 @@ class Canvas(QWidget):
             self.addNodeByName("BooleanNode")
         elif action == _printNode:
             self.addNodeByName("PrintNode")
+        elif action == _videoPlayer:
+            node = self.createNodeOther("elements.Nodes.pyqt5Node", "ImageViewerNode")
+            self.addNode(node)
+        elif action == _videoFile:
+            node = self.createNodeOther("elements.Nodes.pyqt5Node", "VideoFileNode")
+            self.addNode(node)
         elif action == _addClassNode:
             rectangle = ResizableRectangle(0, 0, 1000, 1000)
             self.graphicScene.addItem(rectangle)
@@ -171,6 +181,111 @@ class Canvas(QWidget):
         except Exception as e:
             print(f"Error in createNode: {className} {e}")
             return None
+
+    @staticmethod
+    def createNodeOther(path, className: str, *args, **kwargs):
+        # sourcery skip: use-named-expression
+        """
+        ITA:
+            Crea un nodo a partire dal nome della classe ad Es: "NumberNode".
+            Il metodo importa il modulo e crea un oggetto della classe passata come parametro,
+            quindi ritorna l'interfaccia del nodo. In args e kwargs vanno passati i parametri
+            come Value, Name, InputNumber, OutputNumber ecc...
+        ENG:
+            Create a node from the name of the class, for example "NumberNode".
+            The method imports the module and creates an object of the class passed as a parameter,
+            then it returns the node interface. In args and kwargs you have to pass the parameters
+            as Value, Name, InputNumber, OutputNumber etc ...
+        :param path:
+        :param className: class name of the node
+        :param args:  node, name, inputNumber, outputNumber etc...
+        :param kwargs:  node, name, inputNumber, outputNumber etc...
+        :return:
+        """
+        module = None
+        nodeClass = None
+        try:
+            module = importlib.import_module(f"{path}.{className}")
+        except Exception as e:
+            print(f"module not found: {className} not found {e}")
+        try:
+            if module:
+                nodeClass = getattr(module, className)
+        except Exception as e:
+            print(f"Error in nodeClass: {className} {e}")
+            return None
+        try:
+            if nodeClass:
+                node = nodeClass(*args, **kwargs)
+                value = kwargs.get("node", node.resetValue)
+                if value:
+                    node.resetValue = value
+                return node
+        except Exception as e:
+            print(f"Error in createNode: {className} {e}")
+            return None
+
+    @staticmethod
+    def createNodeFromAbsolutePath(path, className: str, *args, **kwargs):
+        # sourcery skip: use-named-expression
+        """
+        ITA:
+            Crea un nodo a partire dal nome della classe ad Es: "NumberNode".
+            Il metodo importa il modulo e crea un oggetto della classe passata come parametro,
+            quindi ritorna l'interfaccia del nodo. In args e kwargs vanno passati i parametri
+            come Value, Name, InputNumber, OutputNumber ecc...
+        ENG:
+            Create a node from the name of the class, for example "NumberNode".
+            The method imports the module and creates an object of the class passed as a parameter,
+            then it returns the node interface. In args and kwargs you have to pass the parameters
+            as Value, Name, InputNumber, OutputNumber etc ...
+        :param path:
+        :param className: class name of the node
+        :param args:  node, name, inputNumber, outputNumber etc...
+        :param kwargs:  node, name, inputNumber, outputNumber etc...
+        :return:
+        """
+        nodes_folder = os.path.abspath(path)
+        relative_path = os.path.relpath(nodes_folder, os.getcwd())
+        # nel caso la path sia:
+        # r"/home/tedk/Desktop/python/biggusPy_v1.3/elements/Nodes/PythonNodes"
+        # relative_path = "elements/Nodes/PythonNodes"
+        # nodeType = "PythonNodes"
+        # il modulo da importare è:
+        # elemts.Nodes.PythonNodes.ClassName
+        moduleName = f"{relative_path.replace('/', '.')}.{className}"
+        module = None
+        nodeClass = None
+        try:
+            module = importlib.import_module(moduleName)
+        except Exception as e:
+            print(f"module not found: {className} not found {e}")
+        try:
+            if module:
+                nodeClass = getattr(module, className)
+        except Exception as e:
+            print(f"Error in nodeClass: {className} {e}")
+            return None
+        try:
+            if nodeClass:
+                node = nodeClass(*args, **kwargs)
+                value = kwargs.get("node", node.resetValue)
+                if value:
+                    node.resetValue = value
+
+                return node
+        except Exception as e:
+            print(f"Error in createNode: {className} {e}")
+            return None
+
+    def addNodeFromMenu(self, path, className):
+        node = self.createNodeFromAbsolutePath(path, className)
+        position = self.graphicScene.currentMousePos
+        if not position:
+            position = self.graphicScene.sceneRect().center()
+        if node:
+            self.addNode(node)
+            node.setPos(position)
 
     def addNode(self, node):
         _node = self.updateTitle(node)
@@ -290,31 +405,8 @@ class Canvas(QWidget):
         :param code: code to convert
         :return: list of nodes
         """
-        # test codeToNode
-        # codeToNode = CodeToNode(self)
-        codexxx2 = '''def SieveOfEratosthenes(n):
-                                prime_list = []
-                                for i in range(2, n+1):
-                                    if i not in prime_list:
-                                        print (i)
-                                        for j in range(i*i, n+1, i):
-                                            prime_list.append(j)'''
-        code3 = """a = 30\nb = 20\nc = [1,2,3,4,5,6]"""
-        code4 = """a= 30\nb= 20\nc= a + b"""
-        codeTuple = """tuple1 = ("apple", "banana", "cherry")\ntuple2 = (1, 5, 7, 9, 3)\ntuple3 = (True, False, 
-        False)"""
-        codeList = """c = [1,2,3,4,5,6]\nlist1 = ["apple", "banana", "cherry"]"""
-        codeSet = """set1 = {"apple", "banana", "cherry"}\nset2 = {1, 5, 7, 9, 3}"""
-        codeDict = """dict1 = {"brand": "Ford","model": "Mustang","year": 1964}"""
-        # in questo caso non funziona perchè + deve diventare string concat e non mathNode
-        codeString = """a = "Hello, World!"\nb = "Hello, World!"\nc = a + b"""
-        codeIf = """a = 33\nb = 200\nif b > a:\n  print("b is greater than a")"""
-        code = f"""{codeTuple}\n{codeList}\n{codeSet}\n{codeDict}"""
-        # codeToNode.createNodeFromCode(codeComplex2)
-        codeToNode = CodeToNodeWidget(self)
-        codeToNode.setParent(self)  # Imposta il padre come il widget corrente (Canvas)
+        codeToNode = CodeToNode(self, self.parent())
         codeToNode.show()
-        self.graphicView.selectAllCenterSceneAndDeselect()
 
     def createNodeFromCodeToNode(self, className, *args, **kwargs):
         """
@@ -409,3 +501,4 @@ class Canvas(QWidget):
 
             if inputNode and outputNode:
                 self.addConnection(inputNode, inIndex, outputNode, outIndex)
+

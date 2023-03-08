@@ -11,12 +11,13 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 class ListNode(AbstractNodeInterface):
     _className = "ListNode"
     menuReturnValue = "reset"
-    resetValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    startValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     width = 120
     height = 80
-    colorTrain = [QColor(219, 255, 190),QColor(226, 190, 255),QColor(226, 190, 255),QColor(190, 252, 255),QColor(255, 155, 127),QColor(127, 227, 255),QColor(127, 227, 255),QColor(163, 255, 127),]
+    colorTrain = [QColor(219, 255, 190), QColor(226, 190, 255), QColor(226, 190, 255), QColor(190, 252, 255),
+                  QColor(255, 155, 127), QColor(127, 227, 255), QColor(127, 227, 255), QColor(163, 255, 127), ]
 
-    def __init__(self, value: list[Union[int, float, str]]=None, inNum=1, outNum=1):
+    def __init__(self, value: list[Union[int, float, str]] = None, inNum=1, outNum=1):
         super().__init__(inNum, outNum)
         if value is not None:
             self.startValue = value
@@ -127,7 +128,7 @@ class ListNode(AbstractNodeInterface):
         self.changeInputValue(1, [])
         self.menuReturnValue = "append"
         self.updateAll()
-        
+
     def doInsert(self):
         self.removeAllUnnecessaryPlugs()
         self.addInPlug("index")
@@ -136,7 +137,7 @@ class ListNode(AbstractNodeInterface):
         self.changeInputValue(2, [])
         self.menuReturnValue = "insert"
         self.updateAll()
-        
+
     def doPop(self):
         self.removeAllUnnecessaryPlugs()
         self.menuReturnValue = "pop"
@@ -147,14 +148,14 @@ class ListNode(AbstractNodeInterface):
         valueList.pop()
         self.changeInputValue(0, valueList)
         self.updateAll()
-        
+
     def doRemove(self):
         self.removeAllUnnecessaryPlugs()
         self.addInPlug("remove")
         self.changeInputValue(1, [])
         self.menuReturnValue = "remove"
         self.updateAll()
-        
+
     def doClear(self):
         self.removeAllUnnecessaryPlugs()
         self.menuReturnValue = "clear"
@@ -165,14 +166,14 @@ class ListNode(AbstractNodeInterface):
         valueList.clear()
         self.changeInputValue(0, valueList)
         self.updateAll()
-        
+
     def doIndex(self):
         self.removeAllUnnecessaryPlugs()
         self.addInPlug("index")
         self.changeInputValue(1, 0)
         self.menuReturnValue = "index"
         self.updateAll()
-        
+
     def doSort(self):
         self.removeAllUnnecessaryPlugs()
         self.menuReturnValue = "sort"
@@ -183,7 +184,7 @@ class ListNode(AbstractNodeInterface):
         valueList.sort()
         self.changeInputValue(0, valueList)
         self.updateAll()
-        
+
     def doShuffle(self):
         self.removeAllUnnecessaryPlugs()
         self.menuReturnValue = "shuffle"
@@ -194,7 +195,7 @@ class ListNode(AbstractNodeInterface):
         random.shuffle(valueList)
         self.changeInputValue(0, valueList)
         self.updateAll()
-        
+
     def doReverse(self):
         self.removeAllUnnecessaryPlugs()
         self.menuReturnValue = "reverse"
@@ -205,18 +206,16 @@ class ListNode(AbstractNodeInterface):
         valueList.reverse()
         self.changeInputValue(0, valueList)
         self.updateAll()
-        
+
     def doExtend(self):
         self.removeAllUnnecessaryPlugs()
         self.addInPlug("extend")
         self.changeInputValue(1, [])
         self.menuReturnValue = "extend"
         self.updateAll()
-        
+
     def doReset(self):
         self.removeAllUnnecessaryPlugs()
         self.menuReturnValue = "reset"
         self.changeInputValue(0, self.startValue)
         self.updateAll()
-
-        

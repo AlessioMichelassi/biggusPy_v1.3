@@ -140,13 +140,20 @@ class scratchNodeV0_9(QMainWindow):
             Load in ArguePy_CodeEditor the code of the empty node and in the graphic editor the empty node
         :return:
         """
-        with open(r"scratchNodeV0_9/SavedNode/defaultNode.py", "r") as f:
-            code = f.read()
-            self.codeEditor.codeEditor.setPlainText(code)
-            mod = types.ModuleType("DefaultNode")
-            exec(code, mod.__dict__)
-            self.node = self.createNode("DefaultNode", mod, value=10)
-            self.addNode(self.node)
+        # controlla che il file esista:
+        filepath = r"/biggusFolder/biggusCode/ImageCvNode.py"
+        # cerca il file nella cartella da cui è stato lanciato lo script
+        if not os.path.exists(filepath):
+            print("file not found")
+            return
+        else:
+            with open(filepath, "r") as f:
+                code = f.read()
+                self.codeEditor.codeEditor.setPlainText(code)
+                mod = types.ModuleType("DefaultNode")
+                exec(code, mod.__dict__)
+                self.node = self.createNode("DefaultNode", mod, value=10)
+                self.addNode(self.node)
 
     def openFile(self):
         """

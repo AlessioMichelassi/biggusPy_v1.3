@@ -10,6 +10,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 class NumberNode(AbstractNodeInterface):
     resetValue = 0
+    startValue = True
     width = 50
     height = 120
     colorTrain = [QColor(177, 225, 40), QColor(95, 217, 173), QColor(143, 129, 158), QColor(91, 240, 171),

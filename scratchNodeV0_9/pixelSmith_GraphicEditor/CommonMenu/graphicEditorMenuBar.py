@@ -112,10 +112,6 @@ class MenuBar(QMenuBar):
 
     def openFile(self):
         self.mainWindows.openFile()
-        self.addToRecentFiles()
-
-    def addToRecentFiles(self):
-        self.recentFiles.append(self.mainWindows.fileName)
 
     def openRecentFile(self):
         """

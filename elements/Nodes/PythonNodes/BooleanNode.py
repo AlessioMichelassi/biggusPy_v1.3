@@ -10,6 +10,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 class BooleanNode(AbstractNodeInterface):
     resetValue = True
+    startValue = True
     menuReturnValue = "True"
     width = 70
     height = 60

@@ -10,7 +10,7 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 
 class AndNode(AbstractNodeInterface):
-    resetValue = 0
+    startValue = True
     width = 120
     height = 80
     operations = ["and", "or", "not"]
