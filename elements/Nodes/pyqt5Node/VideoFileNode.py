@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QDir, QUrl
 from PyQt5.QtGui import QClipboard
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt5.QtWidgets import QFileDialog, QApplication, QMenu
 
 from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeInterface
 
@@ -10,6 +10,7 @@ class VideoFileNode(AbstractNodeInterface):
     width = 50
     height = 120
     colorTrain = []
+    logo = r"Release/biggusFolder/imgs/logos/Qt.png"
 
     def __init__(self, value="uriFile", inNum=2, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
@@ -39,8 +40,8 @@ class VideoFileNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
 
     def showContextMenu(self, position):
-        contextMenu = self.contextMenu
-        contextMenu.addSection("change name of menu here")
+        contextMenu = QMenu(self)
+        contextMenu.addSection("load a video file")
         action1 = contextMenu.addAction("load file")
         action2 = contextMenu.addAction("set as URL")
         action = contextMenu.exec(position)

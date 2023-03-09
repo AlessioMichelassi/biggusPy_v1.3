@@ -97,3 +97,8 @@ class biggusPy(QMainWindow):
         elif event.key() == Qt.Key.Key_V:
             if event.modifiers() and Qt.KeyboardModifier.ControlModifier:
                 self.canvas.pasteNode()
+
+    # ------------------ SHOW ON CANVAS ------------------
+
+    def printOnStatusBar(self, text):
+        self.statusBar().showMessage(text, 2000)

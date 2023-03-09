@@ -1,3 +1,5 @@
+from PyQt5.QtWidgets import QMenu
+
 from scratchNodeV0_9.pixelSmith_GraphicEditor.elements.nodeV2_1.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeInterface
 
 
@@ -22,7 +24,7 @@ class DefaultNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
 
     def showContextMenu(self, position):
-        contextMenu = self.contextMenu
+        contextMenu = QMenu(self)
         contextMenu.addSection("change name of menu here")
         action1 = contextMenu.addAction("action1")
         action2 = contextMenu.addAction("action2")

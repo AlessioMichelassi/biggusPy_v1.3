@@ -12,9 +12,16 @@ from elements.tools.sliderBox import sliderBox
 class toolz(QWidget):
     sld1: sliderBox
     sld2: sliderBox
+    frame: QFrame
+    grpBox: QGroupBox
+    grpBoxLayout: QVBoxLayout
+    layout: QHBoxLayout
+    width: int = 300
+    height: int = 200
 
     radiusChange = pyqtSignal(str)
     sigmaChange = pyqtSignal(str)
+    valueChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent, Qt.WindowType.Window)
@@ -22,12 +29,33 @@ class toolz(QWidget):
         self.sld1.setSliderRange(0, 100)
         self.sld2 = sliderBox("sigma")
         self.sld2.setSliderRange(0, 100)
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-        self.layout.addWidget(self.sld1)
-        self.layout.addWidget(self.sld2)
+        self.initUI()
+        self.initConnections()
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+
+    def initUI(self):
+        mainLayout = QVBoxLayout()
+        self.frame = QFrame(flags= Qt.WindowFlags())
+        self.frame.setFrameShape(QFrame.StyledPanel)
+        self.frame.setContentsMargins(5, 5, 5, 5)
+        self.frame.setFixedSize(self.width, self.height)
+        self.frame.setLayout(QVBoxLayout())
+        # aggiunge una groupBox
+        self.grpBox = QGroupBox("Blur Tool")
+        self.grpBox.setFixedSize(self.width-10, self.height-10)
+        self.grpBoxLayout = QVBoxLayout()
+        self.grpBox.setLayout(self.grpBoxLayout)
+        self.grpBoxLayout.addWidget(self.sld1, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.grpBoxLayout.addWidget(self.sld2, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.frame.layout().addWidget(self.grpBox)
+        mainLayout.addWidget(self.frame)
+        self.setLayout(mainLayout)
+
+    def initConnections(self):
         self.sld1.valueChanged.connect(self.onRadiusChange)
         self.sld2.valueChanged.connect(self.onSigmaChange)
+        self.sld1.valueChanged.connect(self.valueChanged)
+        self.sld2.valueChanged.connect(self.valueChanged)
 
     def onRadiusChange(self, value):
         self.radiusChange.emit(str(value))
@@ -82,9 +110,11 @@ class BlurCvNode(AbstractNodeInterface):
     startValue = ""
     width = 180
     height = 120
-    colorTrain = []
+    colorTrain = [QColor(255, 234, 242),QColor(255, 91, 110),QColor(142, 255, 242),QColor(218, 255, 251),QColor(110, 255, 91),QColor(170, 61, 73),QColor(52, 19, 23),QColor(142, 255, 242),]
     radius = 7
     sigma = 0
+    lastValue = None
+    logo = r"Release/biggusFolder/imgs/logos/openCvLogo.png"
 
     def __init__(self, value=20, inNum=2, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
@@ -95,14 +125,14 @@ class BlurCvNode(AbstractNodeInterface):
 
     def calculateOutput(self, plugIndex):
         value = self.inPlugs[0].getValue()
-        if isinstance(value, np.ndarray):
-            if self.proxyWidget.combo.currentText() == "Gaussian":
-                value = self.doGaussian(value)
-            elif self.proxyWidget.combo.currentText() == "median":
-                value = self.doMedian(value)
-            elif self.proxyWidget.combo.currentText() == "bilateral":
-                value = self.doBilateral(value)
-            self.outPlugs[plugIndex].setValue(value)
+        operation = {
+            "Gaussian": self.doGaussian,
+            "median": self.doMedian,
+            "bilateral": self.doBilateral,
+        }
+        if value is not None:
+            self.outPlugs[plugIndex].setValue(operation[self.proxyWidget.combo.currentText()](value))
+
         else:
             print("no image")
         return self.outPlugs[plugIndex].getValue()
@@ -131,6 +161,7 @@ class BlurCvNode(AbstractNodeInterface):
         self.setDefaultParameters()
         self.proxyWidget.toolBox.radiusChange.connect(self.onRadiusChange)
         self.proxyWidget.toolBox.sigmaChange.connect(self.onSigmaChange)
+        self.proxyWidget.toolBox.valueChanged.connect(self.nodeData.calculate)
 
     def setDefaultParameters(self):
         self.proxyWidget.combo.setCurrentIndex(0)
@@ -142,11 +173,18 @@ class BlurCvNode(AbstractNodeInterface):
         if value % 2 == 0:
             value += 1
         self.radius = value
-        print(f"Debug print from BlurCvNode: radius = {self.radius}")
         self.calculateOutput(0)
+        if self.nodeData.outConnections:
+            for connection in self.nodeData.outConnections:
+                connection.updateValue()
 
     def onSigmaChange(self, value):
         value = int(value)
 
         self.sigma = value
         self.calculateOutput(0)
+        if self.nodeData.outConnections:
+            for connection in self.nodeData.outConnections:
+                connection.updateValue()
+
+

@@ -71,8 +71,13 @@ class GraphicViewOverride(QGraphicsView):
         :param event:
         :return:
         """
-        delta = event.angleDelta().y()
-        self.scaleScene(1.5 ** (delta / 240.0))
+        if self.selectedItem is None:
+            delta = event.angleDelta().y()
+            self.scaleScene(1.5 ** (delta / 240.0))
+        else:
+            if isinstance(self.selectedItem, QGraphicsProxyWidget):
+                self.selectedItem.widget().wheelEvent(event)
+            return
 
     def scaleScene(self, scaleFactor):
         """

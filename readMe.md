@@ -1,5 +1,4 @@
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/alessiomichelassi)
-
 ITA:
 BiggusPy è un editor di nodi che ti consente di programmare in modo visuale utilizzando una interfaccia 
 grafica intuitiva. Ciascun nodo rappresenta un'istruzione python, come una variabile, una stringa o un 

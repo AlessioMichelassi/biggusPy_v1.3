@@ -2,6 +2,7 @@
 import json
 from collections import OrderedDict
 
+import numpy as np
 from PyQt5.QtCore import QPointF
 from PyQt5.QtWidgets import QWidget
 
@@ -57,6 +58,16 @@ the size of the node, etc etc.
 """
 
 
+class JSONSerializable:
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
+
+    @classmethod
+    def fromJSON(cls, json_str):
+        return json.loads(json_str, object_hook=lambda d: cls(**d))
+
+
 class AbstractNodeInterface:
     colorTrain = []
     toolWidget: QWidget = None
@@ -70,6 +81,8 @@ class AbstractNodeInterface:
     hasAToolWidget = False
     # this variable is used to set the node of the plug to check the compatibility
     valueType = int
+    modulePath = "elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2"
+    logo = r"Release/biggusFolder/imgs/logos/pythonLogo.png"
 
     def __init__(self, value=None, inNum=1, outNum=1, parent=None):
         self.nodeData = AbstractNodeData("AbstractNodeInterface", self)
@@ -128,7 +141,7 @@ class AbstractNodeInterface:
     def initGraphics(self):
         self.nodeGraphic.createTitle()
         self.nodeGraphic.createTxtValue()
-        pngFile = "elements/imgs/pythonLogo.png"
+        pngFile = self.logo
         self.nodeGraphic.setLogo(pngFile)
         if self.colorTrain:
             self.setColorTrain(self.colorTrain)
@@ -399,12 +412,19 @@ class AbstractNodeInterface:
         connections = []
         for connection in self.nodeData.outConnections:
             connections.append(connection.serialize())
+
+        resetValue = self.nodeData.inPlugs[0].getValue()
+        if isinstance(resetValue, np.ndarray):
+            resetValue = resetValue.tolist()
+        elif resetValue is not JSONSerializable:
+            resetValue = str(resetValue)
         dicts = OrderedDict([
             ('className', self.className),
+            ('modulePath', self.modulePath),
             ('name', self.getName()),
             ('title', self.nodeData.getTitle()),
             ('index', self.index),
-            ('node', self.nodeData.inPlugs[0].getValue()),
+            ('resetValue', resetValue),
             ('pos', (int(self.nodeGraphic.pos().x()), int(self.nodeGraphic.pos().y()))),
             ('inPlugsNumb', len(self.inPlugs)),
             ('outPlugsNumb', len(self.outPlugs)),

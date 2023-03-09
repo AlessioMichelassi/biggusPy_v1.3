@@ -38,6 +38,8 @@ class BiggusMenu(QMenuBar):
     systemPath: str
     recentFiles = []
 
+    fileName = "untitled"
+
     def __init__(self, biggusPy, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.biggusPy = biggusPy
@@ -77,7 +79,7 @@ class BiggusMenu(QMenuBar):
 
         self.recentFilesMenu = QMenu('Recent Files', self)
         self.recentFiles = self.loadRecentFiles()
-
+        self.recentFilesMenu.triggered.connect(self.openRecentFile)
         _save = QAction("Save", self)
         _save.setShortcut("Ctrl+S")
         _save.setStatusTip("Save the file")
@@ -145,6 +147,10 @@ class BiggusMenu(QMenuBar):
         self.nodeMenu.addMenu(self.pythonNodeMenu)
         self.nodeMenu.addMenu(self.pyQt5NodeMenu)
         self.nodeMenu.addMenu(self.openCvNodeMenu)
+        self.nodeMenu.addSeparator()
+        action1 = self.nodeMenu.addAction("refresh node list")
+        action1.triggered.connect(self.refreshNodeList)
+        self.nodeMenu.addAction(action1)
 
     def createViewMenu(self):
         """
@@ -168,10 +174,17 @@ class BiggusMenu(QMenuBar):
         _settings.setShortcut("Ctrl+Shift+Right")
         _settings.setStatusTip("Settings")
         _settings.triggered.connect(self.settings)
+
+        _scratchONode = QAction("Scratch O Node", self)
+        _scratchONode.setStatusTip("open the Scratch O Node Editor")
+        _scratchONode.triggered.connect(self.openScratchONode)
         self.viewMenu.addAction(_zoomIn)
         self.viewMenu.addAction(_zoomOut)
         self.viewMenu.addAction(_zoomReset)
+        self.viewMenu.addSeparator()
         self.viewMenu.addAction(_settings)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(_scratchONode)
 
     def createHelpMenu(self):
         """
@@ -195,7 +208,8 @@ class BiggusMenu(QMenuBar):
 
     def newFile(self):
         self.biggusPy.restartCanvas()
-        print(f"this is a print debug from canvas: {self.canvas}")
+        self.biggusPy.printOnStatusBar("new")
+        self.fileName = "Untitled"
 
     def openFile(self):
         self.newFile()
@@ -206,27 +220,35 @@ class BiggusMenu(QMenuBar):
         file = openDialog.selectedFiles()[0]
         with open(file, "r") as f:
             file = f.read()
-        self.canvas.deserialize(file)
-        self.canvas.fileName = openDialog.selectedFiles()[0].split("/")[-1].split(".")[0]
-        self.biggusPy.statusBar().showMessage(f"{self.canvas.fileName}", 2000)
+        self.biggusPy.canvas.deserialize(file)
+        fileName = openDialog.selectedFiles()[0].split("/")[-1].split(".")[0]
+        print(fileName)
+        self.biggusPy.printOnStatusBar(f"File opened {self.fileName}")
         self.saveRecentFiles([openDialog.selectedFiles()[0]])
-        self.biggusPy.updateRecentFileMenu()
+        self.updateRecentFileMenu()
 
-    def openRecentFile(self):
-        print("open recent file")
+    def openRecentFile(self, action):
+        # sourcery skip: use-named-expression
+        filename = action.text()  # ottiene il nome del file dall'action
+        with open(filename, "r") as f:
+            file = f.read()
+        self.biggusPy.canvas.deserialize(file)
+        self.fileName = filename
+        self.biggusPy.printOnStatusBar(f"File opened {self.fileName}")
+        self.saveRecentFiles([filename])
+        self.updateRecentFileMenu()
 
     def saveFile(self):
-        fileData = self.canvas.serialize()
-        if self.biggusPy.fileName is None:
-            file = f"{self.biggusPy.fileName}.json"
+        fileData = self.biggusPy.canvas.serialize()
+        if self.fileName == "untitled":
+            self.saveAsFile()
         else:
-            file = self.biggusPy.fileName
-            self.canvas.fileName = file.split("/")[-1].split(".")[0]
-            self.biggusPy.statusBar().showMessage(f"File saved as {self.canvas.fileName}", 2000)
+            with open(self.fileName, "w") as f:
+                f.write(fileData)
+            self.biggusPy.printOnStatusBar(f"File saved as {self.fileName}")
 
     def saveAsFile(self):
         dialog = QFileDialog.getSaveFileName(self, "Save as", self.biggusPy.path, "Json (*.json)")
-
         if not dialog[0]:
             return
         filename = dialog[0]
@@ -236,7 +258,11 @@ class BiggusMenu(QMenuBar):
             QMessageBox.warning(self, "Dock Widgets",
                                 f"Cannot write file {filename}:\n{reason}.")
             return
-        self.saveFile()
+        with open(filename, "w") as f:
+            f.write(self.biggusPy.canvas.serialize())
+        self.biggusPy.printOnStatusBar(f"File saved as {self.fileName}")
+        self.saveRecentFiles([filename])
+        self.updateRecentFileMenu()
 
     def exitApp(self):
         sys.exit()
@@ -255,6 +281,12 @@ class BiggusMenu(QMenuBar):
 
     def delete(self):
         self.biggusPy.canvas.graphicView.deleteSelectedItems()
+
+    def refreshNodeList(self):
+        self.pythonNodeMenu.updateNodeMenu()
+        self.pyQt5NodeMenu.updateNodeMenu()
+        self.openCvNodeMenu.updateNodeMenu()
+
 
     def addNode(self):
         print("add node")
@@ -283,8 +315,10 @@ class BiggusMenu(QMenuBar):
     def settings(self):
         print("settings")
 
-    def onGraphicEditor(self):
-        scratchNode = scratchNodeV0_9(self.canvas)
+    def openScratchONode(self):
+        scratchNode = scratchNodeV0_9(self.biggusPy.canvas)
+        scratchNode.filePath = "Release/biggusFolder/biggusCode/defaultNode.py"
+        scratchNode.loadUntitledNode(scratchNode.filePath)
         scratchNode.show()
 
     # ------------------ recent files ------------------
@@ -313,7 +347,7 @@ class BiggusMenu(QMenuBar):
         :return:
         """
         self.saveRecentFiles([])
-        self.biggusPy.updateRecentFileMenu()
+        self.updateRecentFileMenu()
 
     def updateRecentFileMenu(self):
         """

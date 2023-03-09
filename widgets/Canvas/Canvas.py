@@ -1,6 +1,7 @@
 import importlib
 import json
 import os
+import sys
 from collections import OrderedDict
 
 from PyQt5.QtCore import *
@@ -54,7 +55,8 @@ print(z)
 
 class Canvas(QWidget):
     node_name_list = ["NumberNode", "StringNode", "ListNode", "DictionaryNode", "MathNode",
-                      "IfNode", "ForNode", "RangeNode", "FunctionNode", "BooleanNode", "WhileNode", "AndNode", "PrintNode"]
+                      "IfNode", "ForNode", "RangeNode", "FunctionNode", "BooleanNode", "WhileNode", "AndNode",
+                      "PrintNode"]
     mainLayout: QVBoxLayout
     graphicScene: GraphicSceneOverride
     graphicView: QGraphicsView
@@ -75,7 +77,7 @@ class Canvas(QWidget):
         self.mainLayout = QVBoxLayout()
         self.graphicScene: GraphicSceneOverride = GraphicSceneOverride()
         self.graphicScene.setGraphicSceneSize(self.width, self.height)
-        self.graphicView:GraphicViewOverride = GraphicViewOverride(self, self.graphicScene)
+        self.graphicView: GraphicViewOverride = GraphicViewOverride(self, self.graphicScene)
         self.mainLayout.addWidget(self.graphicView)
         self.setLayout(self.mainLayout)
 
@@ -161,6 +163,7 @@ class Canvas(QWidget):
         """
         module = None
         nodeClass = None
+        modulePath = "elements.Nodes.PythonNodes"
         try:
             module = importlib.import_module(f"elements.Nodes.PythonNodes.{className}")
         except Exception as e:
@@ -174,6 +177,7 @@ class Canvas(QWidget):
         try:
             if nodeClass:
                 node = nodeClass(*args, **kwargs)
+                node.modulePath = modulePath
                 value = kwargs.get("node", node.resetValue)
                 if value:
                     node.resetValue = value
@@ -226,6 +230,29 @@ class Canvas(QWidget):
             return None
 
     @staticmethod
+    def createNodeFromDeserialize(className, modulePath, *args, **kwargs):
+        module = None
+        nodeClass = None
+        try:
+            module = importlib.import_module(f"{modulePath}.{className}")
+        except Exception as e:
+            print(f"module not found: {className} not found {e}")
+        try:
+            if module:
+                nodeClass = getattr(module, className)
+        except Exception as e:
+            print(f"Error in nodeClass: {className} {e}")
+            return None
+        try:
+            if nodeClass:
+                node = nodeClass(*args, **kwargs)
+                node.modulePath = modulePath
+                return node
+        except Exception as e:
+            print(f"Error in createNode: {className} {e}")
+            return None
+
+    @staticmethod
     def createNodeFromAbsolutePath(path, className: str, *args, **kwargs):
         # sourcery skip: use-named-expression
         """
@@ -247,7 +274,8 @@ class Canvas(QWidget):
         """
         nodes_folder = os.path.abspath(path)
         relative_path = os.path.relpath(nodes_folder, os.getcwd())
-        moduleName = f"{relative_path.replace('/', '.')}.{className}"
+        modulePath = f"{relative_path.replace('/', '.')}"
+        moduleName = f"{modulePath}.{className}"
         module = None
         nodeClass = None
         try:
@@ -263,6 +291,7 @@ class Canvas(QWidget):
         try:
             if nodeClass:
                 node = nodeClass(*args, **kwargs)
+                node.modulePath = modulePath
                 value = kwargs.get("node", node.resetValue)
                 if value:
                     node.resetValue = value
@@ -433,6 +462,7 @@ class Canvas(QWidget):
             ('sceneWidth', self.width),
             ('sceneHeight', self.height),
             ('Nodes', listOfNodeSerialized)])
+        print(dicts)
         return json.dumps(dicts)
 
     def deserialize(self, serializedString):
@@ -453,11 +483,12 @@ class Canvas(QWidget):
         deserialized = json.loads(serializedJsonDictionary)
 
         _className = deserialized["className"]
+        _modulePath = deserialized["modulePath"]
         _name = deserialized["name"]
         _title = deserialized["title"]
         _index = deserialized["index"]
         _pos = deserialized["pos"]
-        _value = int(deserialized["node"])
+        _value = deserialized["resetValue"]
         _inPlugsNumb = deserialized["inPlugsNumb"]
         _outPlugsNumb = deserialized["outPlugsNumb"]
         # se viene specificata la posizione, aumenta la pos corrente
@@ -468,12 +499,16 @@ class Canvas(QWidget):
         else:
             pos = QPointF(float(_pos[0]), float(_pos[1]))
         if "Number" in _className:
-            node = self.createNode(_className, value=_value)
+            node = self.createNode(_className, value=int(_value))
             node.setName(_name)
             node.changeInputValue(0, _value, True)
         else:
-            node = self.createNode(_className)
-            node.setName(_name)
+            try:
+                node = self.createNodeFromDeserialize(_className, _modulePath, value = _value, inNum = _inPlugsNumb, outNum = _outPlugsNumb)
+                node.setName(_name)
+            except Exception as e:
+                print(
+                    f"error: {e} in {self.__class__.__name__} {sys._getframe().f_code.co_name} line: {sys._getframe().f_lineno}")
 
         self.addNode(node)
         node.setPos(pos)
@@ -494,4 +529,3 @@ class Canvas(QWidget):
 
             if inputNode and outputNode:
                 self.addConnection(inputNode, inIndex, outputNode, outIndex)
-

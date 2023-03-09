@@ -33,6 +33,7 @@ class scratchNodeV0_9(QMainWindow):
     node: AbstractNodeInterface = None
     valueChangedFromGraphicEditor = pyqtSignal(str, str, name="valueChangedFromGraphicEditor")
     fileName = None
+    filePath = r"Release/biggusFolder/biggusCode/defaultNode.py"
 
     def __init__(self, parent=None):
         super().__init__(parent, Qt.WindowFlags(Qt.WindowType.Window))
@@ -43,7 +44,6 @@ class scratchNodeV0_9(QMainWindow):
         # self.loadSettings()
         self.initStatusBar()
         self.initConnections()
-        self.loadUntitledNode()
 
     def closeEvent(self, event):
         self.saveSettings()
@@ -130,9 +130,10 @@ class scratchNodeV0_9(QMainWindow):
 
     def newNode(self):
         self.graphicEditor.graphicScene.clear()
-        self.loadUntitledNode()
+        self.loadUntitledNode(self.filePath)
 
-    def loadUntitledNode(self):
+    def loadUntitledNode(self, filepath):
+        # sourcery skip: extract-method
         """
         ITA:
             Carica nel ArguePy_CodeEditor il codice del nodo vuoto e nell'editor grafico il nodo vuoto
@@ -140,8 +141,7 @@ class scratchNodeV0_9(QMainWindow):
             Load in ArguePy_CodeEditor the code of the empty node and in the graphic editor the empty node
         :return:
         """
-        # controlla che il file esista:
-        filepath = r"/biggusFolder/biggusCode/ImageCvNode.py"
+
         # cerca il file nella cartella da cui è stato lanciato lo script
         if not os.path.exists(filepath):
             print("file not found")

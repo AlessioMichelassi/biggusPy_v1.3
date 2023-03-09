@@ -8,23 +8,29 @@ from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeI
 
 class ImageCvNode(AbstractNodeInterface):
     startValue = r"Release/biggusFolder/imgs/imgs/len_full.jpg"
-    width = 50
+    width = 80
     height = 120
-    colorTrain = []
+    colorTrain = [QColor(255, 234, 242),QColor(255, 91, 110),QColor(142, 255, 242),QColor(218, 255, 251),QColor(110, 255, 91),QColor(170, 61, 73),QColor(52, 19, 23),QColor(142, 255, 242),]
 
-    def __init__(self, value= 20, inNum=2, outNum=1, parent=None):
+    logo = r"Release/biggusFolder/imgs/logos/openCvLogo.png"
+
+    def __init__(self, value = None, inNum=1, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
         self.setClassName("ImageCvNode")
         self.setName("ImageCvNode")
+        if value is not None:
+            self.startValue = value
+        self.changeInputValue(0, value)
         self.changeSize(self.width, self.height)
+        self.updateAll()
 
     def calculateOutput(self, plugIndex):
         # sourcery skip: use-named-expression
         path = self.inPlugs[0].getValue()
         if path:
-            value = cv.imread(path)
+            value = cv.imread(path, cv.IMREAD_UNCHANGED)
             if value is None:
-                value = cv.imread(self.startValue)
+                value = cv.imread(self.startValue, cv.IMREAD_UNCHANGED)
             self.outPlugs[plugIndex].setValue(value)
             return self.outPlugs[plugIndex].getValue()
 
@@ -32,10 +38,9 @@ class ImageCvNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
 
     def showContextMenu(self, position):
-        contextMenu = self.contextMenu
-        contextMenu.addSection("change name of menu here")
-        action1 = contextMenu.addAction("open _image")
-
+        contextMenu = QMenu()
+        contextMenu.addSection("Open Image")
+        action1 = contextMenu.addAction("Open Image")
         action = contextMenu.exec(position)
         if action == action1:
             self.openImage()

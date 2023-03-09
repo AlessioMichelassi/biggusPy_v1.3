@@ -138,6 +138,7 @@ class VideoPlayerNode(AbstractNodeInterface):
     height = 250
     colorTrain = []
     proxyWidget: VideoPlayerView
+    logo = r"Release/biggusFolder/imgs/logos/Qt.png"
 
     def __init__(self, value=20, inNum=2, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
@@ -159,7 +160,7 @@ class VideoPlayerNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
 
     def showContextMenu(self, position):
-        contextMenu = self.contextMenu
+        contextMenu = QMenu(self)
         contextMenu.addSection("change name of menu here")
         action1 = contextMenu.addAction("action1")
         action2 = contextMenu.addAction("action2")

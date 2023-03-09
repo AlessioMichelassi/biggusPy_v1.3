@@ -13,6 +13,7 @@ class imageViewer(QGraphicsView):
     _image = None
     _imagePath = r"Release/biggusFolder/imgs/imgs/lena_std.tif"
     imageView: QGraphicsPixmapItem
+    _maxScale = 10.0
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -47,20 +48,27 @@ class imageViewer(QGraphicsView):
 
     def setCvImage(self, cvImage):
         self.scene.clear()
-        rgbImage = cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB)
-        self._image = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QImage.Format_RGB888)
+        cvImage = cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB)
+        self._image = QImage(cvImage.data, cvImage.shape[1], cvImage.shape[0], QImage.Format.Format_RGB888)
         self.scene.addPixmap(QPixmap.fromImage(self._image))
         self.fitInView(self.scene.sceneRect(), Qt.KeepAspectRatio)
 
+
     def resizeEvent(self, event):
-        self.fitInView(self.scene.sceneRect(), Qt.KeepAspectRatio)
         self.centerOn(self.scene.sceneRect().center())
 
     def wheelEvent(self, event):
-        if event.angleDelta().y() > 0:
-            self.scale(1.1, 1.1)
-        else:
-            self.scale(0.9, 0.9)
+        delta = event.angleDelta().y()
+        scaleFactor = 1.1 if delta > 0 else 0.9
+        self.scaleScene(scaleFactor)
+
+    def scaleScene(self, scaleFactor):
+        """
+        Scale the scene
+        :param scaleFactor:
+        :return:
+        """
+        self.scale(scaleFactor, scaleFactor)
 
     def contextMenuEvent(self, event) -> None:
         menu = QMenu()
@@ -102,25 +110,36 @@ class ImageViewerNode(AbstractNodeInterface):
     startValue = 0
     width = 400
     height = 250
-    colorTrain = []
+    colorTrain = [QColor(189, 149, 245), QColor(95, 33, 68), QColor(255, 167, 78), QColor(255, 188, 228),
+                  QColor(255, 255, 255), QColor(66, 76, 163), QColor(163, 49, 117), QColor(255, 139, 209)]
     proxyWidget: imageViewer
+    lastImage = None
+    logo = r"Release/biggusFolder/imgs/logos/Qt.png"
 
     def __init__(self, value=20, inNum=2, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
-        self.setClassName("ImageViewer")
+        self.setClassName("ImageViewerNode")
         self.setName("ImageViewer")
         self.changeSize(self.width, self.height)
         self.AddProxyWidget()
 
     def calculateOutput(self, plugIndex):
         value = self.inPlugs[0].getValue()
-        try:
-            if isinstance(value, np.ndarray):
-                self.proxyWidget.setCvImage(value)
-            elif isinstance(value, QImage):
-                self.proxyWidget.setImage(value)
-        except Exception as e:
-            print(f"invalid video path: {value}")
+        if isinstance(value, np.ndarray):
+            if len(value.shape) == 2:
+                value = cv2.cvtColor(value, cv2.COLOR_GRAY2BGR)  # converti l'immagine in scala di grigio in BGR
+            elif len(value.shape) == 3 and value.shape[2] == 4:
+                value = cv2.cvtColor(value, cv2.COLOR_RGBA2BGR)  # converti l'immagine RGBA in BGR
+            elif len(value.shape) == 3 and value.shape[2] == 2:
+                value = cv2.cvtColor(value, cv2.COLOR_GRAY2BGR)  # converti l'immagine a 2 canali in BGR
+            height, width, channel = value.shape
+            bytesPerLine = 3 * width
+            qImg = QImage(value.data, width, height, bytesPerLine,
+                          QImage.Format.Format_BGR888)  # converte l'immagine in un oggetto QImage in formato BGR
+            self.proxyWidget.setImage(qImg)
+        elif isinstance(value, QImage):
+            self.proxyWidget.setImage(value)
+        self.updateAll()
         self.outPlugs[plugIndex].setValue(value)
         return self.outPlugs[plugIndex].getValue()
 
@@ -128,7 +147,7 @@ class ImageViewerNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
 
     def showContextMenu(self, position):
-        contextMenu = self.contextMenu
+        contextMenu = QMenu(self)
         contextMenu.addSection("change name of menu here")
         action1 = contextMenu.addAction("action1")
         action2 = contextMenu.addAction("action2")
