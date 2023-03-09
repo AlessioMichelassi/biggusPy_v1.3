@@ -35,8 +35,8 @@ class toolz(QWidget):
 
     def initUI(self):
         mainLayout = QVBoxLayout()
-        self.frame = QFrame(flags= Qt.WindowFlags())
-        self.frame.setFrameShape(QFrame.StyledPanel)
+        self.frame = QFrame(flags=Qt.WindowFlags())
+        self.frame.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame.setContentsMargins(5, 5, 5, 5)
         self.frame.setFixedSize(self.width, self.height)
         self.frame.setLayout(QVBoxLayout())
@@ -81,7 +81,7 @@ class cmbBoxWidget(QWidget):
         self.setLayout(self.layout)
         self.combo = QComboBox()
         self.combo.setFixedSize(130, 20)
-        self.combo.addItems(["Gaussian", "median", "bilateral"])
+        self.combo.addItems(["erode", "erode_Border_reflect", "erode_Border_reflect_101", "erode_Border_replicate", "erode_Border_wrap", "erode_Border_constant", "erode_Border_isolated", "dilate", "dilate_Border_reflect", "dilate_Border_reflect_101", "dilate_Border_replicate", "dilate_Border_wrap", "dilate_Border_constant", "dilate_Border_isolated"])
         self.layout.addWidget(self.combo)
         self.combo.currentIndexChanged.connect(self.onComboChanged)
         self.setStyleSheet(self.style)
@@ -91,22 +91,15 @@ class cmbBoxWidget(QWidget):
     def onComboChanged(self, index):
         self.toolBox.sld1.setSliderRange(0, 100)
         self.toolBox.sld2.setSliderRange(0, 100)
-        if index == 0 or index not in [1, 2]:
-            self.toolBox.sld1.setValue(5)
-            self.toolBox.sld2.setValue(0)
-        elif index == 1:
-            self.toolBox.sld1.setValue(7)
-            self.toolBox.sld2.setValue(0)
-        elif index == 2:
-            self.toolBox.sld1.setValue(9)
-            self.toolBox.sld2.setValue(75)
+        self.toolBox.sld1.setValue(5)
+        self.toolBox.sld2.setValue(0)
 
     def showToolBox(self, pos):
         self.toolBox.setGeometry(int(pos.x()), int(pos.y()), 200, 100)
         self.toolBox.show()
 
 
-class BlurCvNode(AbstractNodeInterface):
+class ErodeCvNode(AbstractNodeInterface):
     startValue = ""
     width = 180
     height = 120
@@ -118,8 +111,8 @@ class BlurCvNode(AbstractNodeInterface):
 
     def __init__(self, value=20, inNum=2, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
-        self.setClassName("BlurCvNode")
-        self.setName("BlurCvNode")
+        self.setClassName("ErodeCvNode")
+        self.setName("ErodeCvNode")
         self.changeSize(self.width, self.height)
         self.AddProxyWidget()
 
@@ -127,10 +120,20 @@ class BlurCvNode(AbstractNodeInterface):
         value = self.inPlugs[0].getValue()
         if value is not None:
             operation = {
-                "Gaussian": self.doGaussian,
-                "median": self.doMedian,
-                "bilateral": self.doBilateral,
                 "erode": self.doErode,
+                "erode_Border_reflect": self.doErode_reflect,
+                "erode_Border_reflect_101": self.doErode_reflect_101,
+                "erode_Border_replicate": self.doErode_replicate,
+                "erode_Border_wrap": self.doErode_wrap,
+                "erode_Border_constant": self.doErode_constant,
+                "erode_Border_isolated": self.doErode_isolated,
+                "dilate": self.doDilate,
+                "dilate_Border_reflect": self.doDilate_reflect,
+                "dilate_Border_reflect_101": self.doDilate_reflect_101,
+                "dilate_Border_replicate": self.doDilate_replicate,
+                "dilate_Border_wrap": self.doDilate_wrap,
+                "dilate_Border_constant": self.doDilate_constant,
+                "dilate_Border_isolated": self.doDilate_isolated
             }
             self.outPlugs[plugIndex].setValue(operation[self.proxyWidget.combo.currentText()](value))
 
@@ -141,17 +144,48 @@ class BlurCvNode(AbstractNodeInterface):
     def redesign(self):
         self.changeSize(self.width, self.height)
 
-    def doGaussian(self, image):
-        return cv2.GaussianBlur(image, (self.radius, self.radius), self.sigma)
-
-    def doMedian(self, image):
-        return cv2.medianBlur(image, self.radius)
-
-    def doBilateral(self, image):
-        return cv2.bilateralFilter(image, self.radius, self.sigma, self.sigma)
-
     def doErode(self, image):
         return cv2.erode(image, (self.radius, self.radius))
+
+    def doErode_reflect(self, image):
+        kernel = np.ones((self.radius, self.radius), np.uint8)
+        return cv2.erode(image, kernel, borderType=cv2.BORDER_REFLECT)
+
+    def doErode_reflect_101(self, image):
+        return cv2.erode(image, (self.radius, self.radius), borderType=cv2.BORDER_REFLECT_101)
+
+    def doErode_replicate(self, image):
+        return cv2.erode(image, (self.radius, self.radius), borderType=cv2.BORDER_REPLICATE)
+
+    def doErode_wrap(self, image):
+        return cv2.erode(image, (self.radius, self.radius), borderType=cv2.BORDER_WRAP)
+
+    def doErode_constant(self, image):
+        return cv2.erode(image, (self.radius, self.radius), borderType=cv2.BORDER_CONSTANT)
+
+    def doErode_isolated(self, image):
+        return cv2.erode(image, (self.radius, self.radius), borderType=cv2.BORDER_ISOLATED)
+
+    def doDilate(self, image):
+        return cv2.dilate(image, (self.radius, self.radius))
+
+    def doDilate_reflect(self, image):
+        return cv2.dilate(image, (self.radius, self.radius), borderType=cv2.BORDER_REFLECT)
+
+    def doDilate_reflect_101(self, image):
+        return cv2.dilate(image, (self.radius, self.radius), borderType=cv2.BORDER_REFLECT_101)
+
+    def doDilate_replicate(self, image):
+        return cv2.dilate(image, (self.radius, self.radius), borderType=cv2.BORDER_REPLICATE)
+
+    def doDilate_wrap(self, image):
+        return cv2.dilate(image, (self.radius, self.radius), borderType=cv2.BORDER_WRAP)
+
+    def doDilate_constant(self, image):
+        return cv2.dilate(image, (self.radius, self.radius), borderType=cv2.BORDER_CONSTANT)
+
+    def doDilate_isolated(self, image):
+        return cv2.dilate(image, (self.radius, self.radius), borderType=cv2.BORDER_ISOLATED)
 
     def AddProxyWidget(self):
         self.proxyWidget = cmbBoxWidget(self)
