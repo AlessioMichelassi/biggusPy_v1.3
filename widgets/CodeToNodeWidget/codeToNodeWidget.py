@@ -42,7 +42,8 @@ class CodeToNodeWidget(QWidget):
         self.canvas = canvas
         self.setGeometry(0, 0, 500, 500)
         self.layout = QVBoxLayout()
-        self.argue = txtWidget("...")
+        self.argue = txtWidget()
+        self.argue.setPlaceholderText("Insert your code here")
         self.layout.addWidget(self.argue)
         self.setLayout(self.layout)
 
@@ -80,7 +81,8 @@ class CodeToNodeWidget(QWidget):
             self.createConnections()
             self.searchUnpositionNodes()
         except Exception as e:
-            continue_ = QMessageBox.question(self, "Error", f"Error: {e}\nDo you want to continue?", QMessageBox.Yes | QMessageBox.No)
+            continue_ = QMessageBox.question(self, "Error", f"Error: {e}\nDo you want to continue?",
+                                             QMessageBox.Yes | QMessageBox.No)
             if continue_ != QMessageBox.StandardButton.Yes:
                 self.close()
 
@@ -94,21 +96,22 @@ class CodeToNodeWidget(QWidget):
         self.code = self.code.replace(code, "")
         self.createNodeFromCode(self.code)
 
+    def printActualCode(self, node):
+        try:
+            print(f"actual code: {ast.get_source_segment(self.code, node).strip()}")
+        except Exception as e:
+            a = e
+
     def nodeSearch(self, parsedCode: ast.AST):
         function_nodes = []
         for node in ast.walk(parsedCode):
-            try:
-                print(f"actual code: {ast.get_source_segment(self.code, node).strip()}")
-            except Exception as e:
-                a = e
-
             if isinstance(node, ast.FunctionDef):
                 fn = self.createFunctionNode(node)
                 function_nodes.append(fn)
                 self.removeCodeAndRestart(node)
                 break
             elif isinstance(node, ast.For):
-                print("For")
+                self.createForNode(node)
             elif isinstance(node, ast.If):
                 self.createIfNode(node)
             elif isinstance(node, ast.Call):
@@ -600,6 +603,201 @@ class CodeToNodeWidget(QWidget):
         y = lastNode.getPos().y() + lastNode.getHeight() * 1.2
         self.updateNodePosition(node, x, y)
 
+    # ------------------ WHILE NODE ------------------
+
+    def createWhileNode(self, node):
+        code = ast.get_source_segment(self.code, node).strip()
+        print(f"\ncreate WhileNode with code:\n {code}\n")
+        whileNode = self.returnBiggusPyNode("WhileNode", True, "WhileNode")
+        self.createWhileBodyNode(node, whileNode)
+        self.createWhileConditionNode(node, whileNode)
+
+    def createWhileConditionNode(self, node, whileNode):
+        condition = node.test
+        if isinstance(condition, ast.Compare):
+            operator = self.returnIfOperator(left=condition.left, right=condition.comparators[0], value=condition)
+            whileNode.setOperator(operator)
+            leftNode = condition.left
+            arg1 = self.canvas.getNodeByName(leftNode.id)
+            arg2 = self.canvas.getNodeByName(condition.comparators[0].id)
+            if arg1 is not None and arg2 is not None:
+                self.setWhileNodePosition(arg1, arg2, whileNode)
+                self.createConnection(arg1, whileNode)
+                self.createConnection(arg2, whileNode)
+
+    def createWhileBodyNode(self, node, whileNode):
+        body = node.body
+        for statement in body:
+            if isinstance(statement, ast.Expr):
+                if isinstance(statement.value, ast.Call):
+                    if statement.value.func.id == "print":
+                        args = statement.value.args
+                        if len(args) > 0 and isinstance(args[0], ast.Constant):
+                            printNode = self.returnBiggusPyNode("PrintNode", True, "PrintNode")
+                            text = args[0].value
+                            if text is not None:
+                                stringNode = self.returnBiggusPyNode("StringNode", text, "StringNode")
+                                self.setWhileBodyNodePosition(stringNode)
+                                self.setWhileOutNodePosition(printNode)
+                                self.createConnection(stringNode, whileNode)
+                            else:
+                                self.setWhileBodyNodePosition(printNode)
+                            self.createConnection(whileNode, printNode)
+
+    def setWhileNodePosition(self, arg1, arg2, whileNode):
+        x0 = arg1.getPos().x()
+        x1 = max(arg1.getWidth(), arg2.getWidth()) * 1.2
+        x = (x0 + x1) * 2
+        y0 = arg1.getPos().y()
+        y1 = arg2.getPos().y()
+        y = (y0 + y1) // 2
+        self.updateNodePosition(whileNode, x, y)
+        self.lastWhileNode = whileNode
+
+    def setWhileBodyNodePosition(self, *args):
+        lastNode = self.lastWhileNode
+        x = lastNode.getPos().x() + lastNode.getWidth() * 2
+        y = lastNode.getPos().y() - lastNode.getHeight() * 1.2
+        for node in args:
+            self.updateNodePosition(node, x, y)
+            x += node.getWidth() * 2
+            y += lastNode.getPos().y() - node.getHeight()
+            lastNode = node
+
+    def setWhileOutNodePosition(self, node):
+        lastNode = self.lastWhileNode
+        x = lastNode.getPos().x() + lastNode.getWidth() * 2
+        y = lastNode.getPos().y() + lastNode.getHeight() * 1.2
+        self.updateNodePosition(node, x, y)
+
+    # ------------------ FOR NODE ------------------
+
+    def createForNode(self, node):
+        code = ast.get_source_segment(self.code, node).strip()
+        print(f"\ncreate ForNode with code:\n {code}\n")
+        forNode = self.returnBiggusPyNode("ForNode", [], "ForNode")
+        self.createForConditionNode(node, forNode)
+        self.createForBodyNode(node, forNode)
+
+
+    def createForConditionNode(self, node, forNode):
+        # condition è un ast.Call ad esempio range(10)
+        condition = node.iter
+        if isinstance(condition, ast.Name):
+            self.checkIterables(condition, forNode)
+        if isinstance(condition, ast.Call):
+            if condition.func.id == "range":
+                self.createRangeNode(condition, forNode)
+            elif condition.func.id == "xrange":
+                self.createXrangeNode(condition, forNode)
+            elif condition.func.id == "zip":
+                self.createZipNode(condition, forNode)
+            elif condition.func.id == "enumerate":
+                self.createEnumerateNode(condition, forNode)
+            elif condition.func.id == "map":
+                self.createMapNode(condition, forNode)
+            elif condition.func.id == "in":
+                self.createInNode(condition, forNode)
+
+    def checkIterables(self, condition, forNode):
+        iterable = self.canvas.getNodeByName(condition.id)
+        if iterable is not None:
+            self.setForNodePosition(iterable, forNode)
+            self.createConnection(iterable, forNode)
+        else:
+            print(f"Debug: iterable {condition.id} is not in canvas")
+
+    def createRangeNode(self, condition, forNode):
+        if len(condition.args) == 1:
+            if isinstance(condition.args[0], ast.Constant):
+                arg1 = self.returnBiggusPyNode("RangeNode", condition.args[0].value, "RangeNode")
+                self.createConnection(arg1, forNode)
+        elif len(condition.args) == 2:
+            if isinstance(condition.args[0], ast.Constant) and isinstance(condition.args[1], ast.Constant):
+                arg1 = self.returnBiggusPyNode("RangeNode", condition.args[0].value, "RangeNode")
+                arg2 = arg1.setInputValue(1, condition.args[1].value, True)
+                self.setForNodePosition(arg1, forNode)
+                self.createConnection(arg1, forNode)
+
+    def createXrangeNode(self, condition, forNode):
+        if len(condition.args) == 1:
+            if isinstance(condition.args[0], ast.Constant):
+                arg1 = self.returnBiggusPyNode("XrangeNode", condition.args[0].value, "XrangeNode")
+                self.createConnection(arg1, forNode)
+        elif len(condition.args) == 2:
+            if isinstance(condition.args[0], ast.Constant) and isinstance(condition.args[1], ast.Constant):
+                arg1 = self.returnBiggusPyNode("XrangeNode", condition.args[0].value, "XrangeNode")
+                arg2 = arg1.setInputValue(1, condition.args[1].value, True)
+                self.setForNodePosition(arg1, forNode)
+                self.createConnection(arg1, forNode)
+
+    def createZipNode(self, condition, forNode):
+        if len(condition.args) > 0:
+            for arg in condition.args:
+                if isinstance(arg, ast.Name):
+                    arg1 = self.returnBiggusPyNode("ZipNode", arg.id, "ZipNode")
+                    self.setForNodePosition(arg1, forNode)
+                    self.createConnection(arg1, forNode)
+
+    def createEnumerateNode(self, condition, forNode):
+        if len(condition.args) == 1:
+            if isinstance(condition.args[0], ast.Name):
+                arg1 = self.returnBiggusPyNode("EnumerateNode", condition.args[0].id, "EnumerateNode")
+                self.setForNodePosition(arg1, forNode)
+                self.createConnection(arg1, forNode)
+
+    def createMapNode(self, condition, forNode):
+        if len(condition.args) == 2:
+            if isinstance(condition.args[0], ast.Name) and isinstance(condition.args[1], ast.Name):
+                arg1 = self.returnBiggusPyNode("MapNode", condition.args[0].id, "MapNode")
+                arg2 = arg1.setInputValue(1, condition.args[1].id, True)
+                self.setForNodePosition(arg1, forNode)
+                self.createConnection(arg1, forNode)
+
+    def createInNode(self, condition, forNode):
+        if len(condition.args) == 2:
+            if isinstance(condition.args[0], ast.Name) and isinstance(condition.args[1], ast.Name):
+                arg1 = self.returnBiggusPyNode("InNode", condition.args[0].id, "InNode")
+                arg2 = arg1.setInputValue(1, condition.args[1].id, True)
+                self.setForNodePosition(arg1, forNode)
+                self.createConnection(arg1, forNode)
+
+    def createForBodyNode(self, node, forNode):
+        body = node.body
+        for statement in body:
+            if isinstance(statement, ast.Expr):
+                if isinstance(statement.value, ast.Call):
+                    callNode = self.canvas.getNodeByName(statement.value.func.id)
+                    if callNode is not None:
+                        self.setForBodyNodePosition(callNode, forNode)
+                        self.createConnection(forNode, callNode)
+                    else:
+                        print(f"Debug: function {statement.value.func.id} is not in canvas")
+                        print(f"statementvalue {statement.value} function id {statement.value.func}")
+                        callNode = self.returnBiggusPyNode("FunctionNode", statement.value.func.id, "FunctionNode")
+
+    def setForNodePosition(self, rangeNode, forNode):
+        # il for node sta alla destra del range node
+        x = self.lastNode.getPos().x() + self.lastNode.getWidth() * 2
+        y = self.lastNode.getPos().y()
+        rangeNode.setPos(QPointF(x, y))
+        self.lastNode = rangeNode
+        x = rangeNode.getPos().x() + rangeNode.getWidth() * 3
+        y = rangeNode.getPos().y() + (self.lastNode.getHeight())
+        forNode.setPos(QPointF(x, y))
+
+    def setForBodyNodePosition(self, bodyNode, forNode):
+        x = self.lastNode.getPos().x() + self.lastNode.getWidth() * 2
+        y = self.lastNode.getPos().y()
+        bodyNode.setPos(QPointF(x, y))
+        self.lastNode = bodyNode
+
+    def setForOutNodePosition(self, node):
+        lastNode = self.lastForNode
+        x = lastNode.getPos().x() + lastNode.getWidth() * 2
+        y = lastNode.getPos().y() + lastNode.getHeight() * 1.2
+        self.updateNodePosition(node, x, y)
+
     # ------------------ FUNCTION NODE ------------------
 
     def createFunctionNode(self, node):
@@ -758,5 +956,3 @@ class CodeToNodeWidget(QWidget):
                 break
             plugIndex += 1
         self.canvas.addConnection(node2, plugIndex, node1, 0)
-
-

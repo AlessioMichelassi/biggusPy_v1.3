@@ -8,6 +8,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from scratchNodeV0_9.scratchNode import scratchNodeV0_9
+from widgets.CodeToNodeWidget.codeToNode import FromCodeToNode
 from widgets.Menu.openCvNodeMenu import OpenCvNodeMenu
 from widgets.Menu.pythonNodeMenu import PythonNodeMenu
 from widgets.Menu.pyQt5NodeMenu import PyQt5NodeMenu
@@ -151,6 +152,9 @@ class BiggusMenu(QMenuBar):
         action1 = self.nodeMenu.addAction("refresh node list")
         action1.triggered.connect(self.refreshNodeList)
         self.nodeMenu.addAction(action1)
+        self.nodeMenu.addSeparator()
+        action2 = self.nodeMenu.addAction("from code to node")
+        action2.triggered.connect(self.fromCodeToNode)
 
     def createViewMenu(self):
         """
@@ -287,6 +291,9 @@ class BiggusMenu(QMenuBar):
         self.pyQt5NodeMenu.updateNodeMenu()
         self.openCvNodeMenu.updateNodeMenu()
 
+    def fromCodeToNode(self):
+        fromCodeToNodeWindow = FromCodeToNode(self.biggusPy.canvas, self.biggusPy)
+        fromCodeToNodeWindow.show()
 
     def addNode(self):
         print("add node")

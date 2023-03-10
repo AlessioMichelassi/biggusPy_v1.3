@@ -16,7 +16,6 @@ from elements.object.resizableRectangle import ResizableRectangle
 from graphicEngine.GraphicSceneOverride import GraphicSceneOverride
 from graphicEngine.graphicViewOverride import GraphicViewOverride
 
-from widgets.CodeToNodeWidget.codeToNode import CodeToNode
 from widgets.NodeFinderWidget import NodeFinderWidget
 
 code2 = '''
@@ -421,15 +420,6 @@ class Canvas(QWidget):
                 return node
         return None
 
-    def createNodeFromCode(self):
-        """
-        This method create a list of nodes from a code
-        :param code: code to convert
-        :return: list of nodes
-        """
-        codeToNode = CodeToNode(self, self.parent())
-        codeToNode.show()
-
     def createNodeFromCodeToNode(self, className, *args, **kwargs):
         """
         This method create a node from a codeToNode
@@ -504,7 +494,8 @@ class Canvas(QWidget):
             node.changeInputValue(0, _value, True)
         else:
             try:
-                node = self.createNodeFromDeserialize(_className, _modulePath, value = _value, inNum = _inPlugsNumb, outNum = _outPlugsNumb)
+                node = self.createNodeFromDeserialize(_className, _modulePath, value=_value, inNum=_inPlugsNumb,
+                                                      outNum=_outPlugsNumb)
                 node.setName(_name)
             except Exception as e:
                 print(
