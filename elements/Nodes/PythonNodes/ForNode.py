@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import ast
 import math
 import random
 from typing import Union
@@ -8,6 +9,18 @@ from PyQt5.QtWidgets import QMenu
 
 from elements.Nodes.AbstractClass.AbstractNodeInterfaceV1_2 import AbstractNodeInterface
 
+testCode = """
+numbers = [1, 2, 3, 4, 5]
+total = 0
+for n in numbers:
+    total += n
+print(total)"""
+
+testCode2 = """
+fruits = ["apple", "banana", "cherry"]
+for x in fruits:
+  print(x)
+"""
 
 class ForNode(AbstractNodeInterface):
     resetValue = []
@@ -28,18 +41,24 @@ class ForNode(AbstractNodeInterface):
         self.changeInputValue(0, value, True)
         self.setPlugInTitle(0, "iterable")
         self.setPlugInTitle(1, "function")
+        self.changeInputValue(1, self.startFunction, True)
 
     def calculateOutput(self, plugIndex):
         iterable = self.inPlugs[0].getValue()
-        function = self.createFunction(self.inPlugs[1].getValue())
-        accumulator = None
-        for value in iterable:
-            accumulator = function(value)
-        self.outPlugs[0].setValue(accumulator)
-        return self.outPlugs[0].getValue()
+        function = self.inPlugs[1].getValue()
+        if function is not None:
+            try:
+                functionGlobals = {}
+                exec(function, functionGlobals)
+                returnFunction = functionGlobals["function"]
+                returnValue = [returnFunction(value) for value in iterable]
+            except Exception as e:
+                print(f"WARNING FROM FOR NODE: FUNCTION IS NOT VALID\n{e}")
+                print("__"*20)
+                returnValue = []
+            self.outPlugs[plugIndex].setValue(returnValue)
+        return self.outPlugs[plugIndex].getValue()
 
-    @staticmethod
-    def createFunction(_function):
-        return _function if callable(_function) else (lambda x: x)
+
 
 

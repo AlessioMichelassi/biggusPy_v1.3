@@ -142,7 +142,7 @@ class Canvas(QWidget):
         return returnNodes
 
     @staticmethod
-    def createNode(className: str, *args, **kwargs):
+    def createNode2(className: str, *args, **kwargs):
         # sourcery skip: use-named-expression
         """
         ITA:
@@ -184,6 +184,19 @@ class Canvas(QWidget):
         except Exception as e:
             print(f"Error in createNode: {className} {e}")
             return None
+
+    def createNode(self, className: str, *args, **kwargs):
+        module = None
+        nodeClass = None
+        modulePath = "elements.Nodes.PythonNodes"
+        module = importlib.import_module(f"{modulePath}.{className}")
+        nodeClass = getattr(module, className)
+        node = nodeClass(*args, **kwargs)
+        node.modulePath = modulePath
+        value = kwargs.get("node", node.resetValue)
+        if value:
+            node.resetValue = value
+        return node
 
     @staticmethod
     def createNodeOther(path, className: str, *args, **kwargs):

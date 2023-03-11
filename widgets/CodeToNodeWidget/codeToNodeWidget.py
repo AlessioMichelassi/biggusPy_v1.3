@@ -81,10 +81,8 @@ class CodeToNodeWidget(QWidget):
             self.createConnections()
             self.searchUnpositionNodes()
         except Exception as e:
-            continue_ = QMessageBox.question(self, "Error", f"Error: {e}\nDo you want to continue?",
-                                             QMessageBox.Yes | QMessageBox.No)
-            if continue_ != QMessageBox.StandardButton.Yes:
-                self.close()
+            print("debug from createNodeFromCode: ", e)
+            raise e
 
     @staticmethod
     def parseCode(_code: str):
@@ -674,11 +672,8 @@ class CodeToNodeWidget(QWidget):
 
     def createForNode(self, node):
         code = ast.get_source_segment(self.code, node).strip()
-        print(f"\ncreate ForNode with code:\n {code}\n")
         forNode = self.returnBiggusPyNode("ForNode", [], "ForNode")
         self.createForConditionNode(node, forNode)
-        self.createForBodyNode(node, forNode)
-
 
     def createForConditionNode(self, node, forNode):
         # condition è un ast.Call ad esempio range(10)
@@ -688,14 +683,6 @@ class CodeToNodeWidget(QWidget):
         if isinstance(condition, ast.Call):
             if condition.func.id == "range":
                 self.createRangeNode(condition, forNode)
-            elif condition.func.id == "xrange":
-                self.createXrangeNode(condition, forNode)
-            elif condition.func.id == "zip":
-                self.createZipNode(condition, forNode)
-            elif condition.func.id == "enumerate":
-                self.createEnumerateNode(condition, forNode)
-            elif condition.func.id == "map":
-                self.createMapNode(condition, forNode)
             elif condition.func.id == "in":
                 self.createInNode(condition, forNode)
 
@@ -712,47 +699,14 @@ class CodeToNodeWidget(QWidget):
             if isinstance(condition.args[0], ast.Constant):
                 arg1 = self.returnBiggusPyNode("RangeNode", condition.args[0].value, "RangeNode")
                 self.createConnection(arg1, forNode)
+                return arg1
         elif len(condition.args) == 2:
             if isinstance(condition.args[0], ast.Constant) and isinstance(condition.args[1], ast.Constant):
                 arg1 = self.returnBiggusPyNode("RangeNode", condition.args[0].value, "RangeNode")
                 arg2 = arg1.setInputValue(1, condition.args[1].value, True)
                 self.setForNodePosition(arg1, forNode)
                 self.createConnection(arg1, forNode)
-
-    def createXrangeNode(self, condition, forNode):
-        if len(condition.args) == 1:
-            if isinstance(condition.args[0], ast.Constant):
-                arg1 = self.returnBiggusPyNode("XrangeNode", condition.args[0].value, "XrangeNode")
-                self.createConnection(arg1, forNode)
-        elif len(condition.args) == 2:
-            if isinstance(condition.args[0], ast.Constant) and isinstance(condition.args[1], ast.Constant):
-                arg1 = self.returnBiggusPyNode("XrangeNode", condition.args[0].value, "XrangeNode")
-                arg2 = arg1.setInputValue(1, condition.args[1].value, True)
-                self.setForNodePosition(arg1, forNode)
-                self.createConnection(arg1, forNode)
-
-    def createZipNode(self, condition, forNode):
-        if len(condition.args) > 0:
-            for arg in condition.args:
-                if isinstance(arg, ast.Name):
-                    arg1 = self.returnBiggusPyNode("ZipNode", arg.id, "ZipNode")
-                    self.setForNodePosition(arg1, forNode)
-                    self.createConnection(arg1, forNode)
-
-    def createEnumerateNode(self, condition, forNode):
-        if len(condition.args) == 1:
-            if isinstance(condition.args[0], ast.Name):
-                arg1 = self.returnBiggusPyNode("EnumerateNode", condition.args[0].id, "EnumerateNode")
-                self.setForNodePosition(arg1, forNode)
-                self.createConnection(arg1, forNode)
-
-    def createMapNode(self, condition, forNode):
-        if len(condition.args) == 2:
-            if isinstance(condition.args[0], ast.Name) and isinstance(condition.args[1], ast.Name):
-                arg1 = self.returnBiggusPyNode("MapNode", condition.args[0].id, "MapNode")
-                arg2 = arg1.setInputValue(1, condition.args[1].id, True)
-                self.setForNodePosition(arg1, forNode)
-                self.createConnection(arg1, forNode)
+                return arg1
 
     def createInNode(self, condition, forNode):
         if len(condition.args) == 2:
@@ -761,20 +715,7 @@ class CodeToNodeWidget(QWidget):
                 arg2 = arg1.setInputValue(1, condition.args[1].id, True)
                 self.setForNodePosition(arg1, forNode)
                 self.createConnection(arg1, forNode)
-
-    def createForBodyNode(self, node, forNode):
-        body = node.body
-        for statement in body:
-            if isinstance(statement, ast.Expr):
-                if isinstance(statement.value, ast.Call):
-                    callNode = self.canvas.getNodeByName(statement.value.func.id)
-                    if callNode is not None:
-                        self.setForBodyNodePosition(callNode, forNode)
-                        self.createConnection(forNode, callNode)
-                    else:
-                        print(f"Debug: function {statement.value.func.id} is not in canvas")
-                        print(f"statementvalue {statement.value} function id {statement.value.func}")
-                        callNode = self.returnBiggusPyNode("FunctionNode", statement.value.func.id, "FunctionNode")
+                return arg1
 
     def setForNodePosition(self, rangeNode, forNode):
         # il for node sta alla destra del range node
@@ -787,10 +728,10 @@ class CodeToNodeWidget(QWidget):
         forNode.setPos(QPointF(x, y))
 
     def setForBodyNodePosition(self, bodyNode, forNode):
-        x = self.lastNode.getPos().x() + self.lastNode.getWidth() * 2
-        y = self.lastNode.getPos().y()
-        bodyNode.setPos(QPointF(x, y))
-        self.lastNode = bodyNode
+        # posiziona il body node alla sinistra del for node e sotto
+        x = forNode.getPos().x() - (forNode.getWidth() + bodyNode.getWidth()*1.2)
+        y = forNode.getPos().y() + (forNode.getHeight() * 1.2)
+        self.updateNodePosition(bodyNode, x, y)
 
     def setForOutNodePosition(self, node):
         lastNode = self.lastForNode
