@@ -45,7 +45,10 @@ class PlugGraphic(QGraphicsItem):
         self.createTitleText()
 
     def __str__(self):
-        return f"[{self.title}] = {self.plugData.getValue()} index = {self.plugData.index}"
+        returnValue = f"{self.plugData.getTitle()}: {self.plugData.getValue()}\n"
+        returnCode = f"{self.plugData.getCode()}\n"
+        returnPlug = f"[{self.title}] = {self.plugData.getValue()} index = {self.plugData.index}\n"
+        return returnValue + returnCode + returnPlug
 
     @property
     def name(self):
@@ -54,6 +57,9 @@ class PlugGraphic(QGraphicsItem):
     @property
     def title(self):
         return f"{self.plugData.getTitle()}"
+
+    def getNode(self):
+        return self.nodeGraphic.nodeInterface
 
     def createTitleText(self):
         font = QFont()

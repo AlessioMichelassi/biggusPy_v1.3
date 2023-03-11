@@ -98,6 +98,7 @@ class RangeNode(AbstractNodeInterface):
     colorTrain = [QColor(87, 255, 157), QColor(255, 87, 185), QColor(255, 138, 206), QColor(255, 214, 238),
                   QColor(157, 87, 255), QColor(58, 170, 105), QColor(255, 87, 185), QColor(255, 138, 206),
                   QColor(255, 214, 238)]
+    proxyWidget: RangeNodeUI
 
     def __init__(self, start: int = 0, value: int = 10, step: int = 1, inNum=3, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
@@ -123,6 +124,9 @@ class RangeNode(AbstractNodeInterface):
         self.outPlugs[plugIndex].setValue(value)
         return self.outPlugs[plugIndex].getValue()
 
+    def getCode(self):
+        return self.returnRangeCode()
+
     def redesign(self):
         self.changeSize(self.width, self.height)
 
@@ -141,3 +145,9 @@ class RangeNode(AbstractNodeInterface):
         self.proxyWidget.lneStart.setText(str(self.inPlugs[0].getValue()))
         self.proxyWidget.lneEnd.setText(str(self.inPlugs[1].getValue()))
         self.proxyWidget.lneStep.setText(str(self.inPlugs[2].getValue()))
+
+    def returnRangeCode(self):
+        startTitle, startCode = self.getCodeFromInput(0)
+        endTitle, endCode = self.getCodeFromInput(1)
+        stepTitle, stepCode = self.getCodeFromInput(2)
+        return f'{startCode}\n{endCode}\n{stepCode}\n{self.getTitle()} = range({startTitle}, {endTitle}, {stepTitle})'

@@ -73,6 +73,9 @@ class AbstractNodeInterface:
     toolWidget: QWidget = None
     isDisabled = False
     contextMenu = None
+    # Quando il nodo viene salvato, viene salvato anche il valore del menu a tendina
+    # in modo da ripristinare lo stato del nodo quando viene caricato
+    menuReturnValue = None
     resetValue = 0
     isEditable = False
     canvas = None
@@ -118,8 +121,7 @@ class AbstractNodeInterface:
     #
     #      THIS FUNCTION IS FOR GRAPHIC NODES
 
-    @property
-    def title(self):
+    def getTitle(self):
         return self.nodeData.getTitle()
 
     def setPos(self, pos):
@@ -166,7 +168,7 @@ class AbstractNodeInterface:
             self.nodeData.index = 0
             return self.title
         node = self.canvas.updateTitle(self)
-        return node.title
+        return node.getTitle
 
     def setColorTrain(self, colorTrain):
         self.nodeGraphic.setColorTrain(colorTrain)
@@ -271,6 +273,28 @@ class AbstractNodeInterface:
         """
         raise NotImplementedError
 
+    def getCode(self):
+        """
+        ITA:
+            Questa funzione viene chiamata quando si vuole ottenere il codice del nodo.
+            e viene creata direttamente dal nodo.
+        ENG:
+            This function is called when you want to get the code of the node.
+            and it is created directly by the node.
+        :return:
+        """
+        print("getCode() not implemented")
+        return None
+
+    def getCodeFromInput(self, index):
+        try:
+            if not self.inPlugs[index].inConnection:
+                return self.getTitle(), self.inPlugs[index].getCode()
+            inPlugNodeName = self.inPlugs[index].inConnection.outputNode.getTitle()
+            return inPlugNodeName, self.inPlugs[index].inConnection.outputNode.nodeInterface.getCode()
+        except Exception as e:
+            return None, None
+
     # ###############################################
     #
     #    Plug functions
@@ -328,8 +352,14 @@ class AbstractNodeInterface:
     def setPlugInTitle(self, plugIndex, name):
         self.nodeData.inPlugs[plugIndex].setName(name)
 
+    def getPlugInTitle(self, plugIndex):
+        return self.nodeData.inPlugs[plugIndex].name
+
     def setPlugOutTitle(self, plugIndex, name):
         self.nodeData.outPlugs[plugIndex].setName(name)
+
+    def getPlugOutTitle(self, plugIndex):
+        return self.nodeData.outPlugs[plugIndex].name
 
     def addInPlug(self, name=None):
         plug = PlugData("In", len(self.nodeData.inPlugs))
@@ -398,6 +428,13 @@ class AbstractNodeInterface:
         """
         pass
 
+    def setMenuOperation(self, operation):
+        self.menuOperation = operation
+        # in operation viene salvata la action che ha generato il menu
+        # in questo modo si può sapere quale azione è stata scelta
+        # e quindi eseguire l'azione corretta
+        self.nodeGraphic.contextMenu.setDefaultAction(operation)
+
     def showToolWidget(self):
         """
         Mostra il tool widget del nodo
@@ -425,6 +462,7 @@ class AbstractNodeInterface:
             ('title', self.nodeData.getTitle()),
             ('index', self.index),
             ('resetValue', resetValue),
+            ('menuReturnValue', self.menuReturnValue),
             ('pos', (int(self.nodeGraphic.pos().x()), int(self.nodeGraphic.pos().y()))),
             ('inPlugsNumb', len(self.inPlugs)),
             ('outPlugsNumb', len(self.outPlugs)),

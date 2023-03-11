@@ -67,6 +67,24 @@ class SetNode(AbstractNodeInterface):
         self.outPlugs[plugIndex].setValue(result)
         return self.outPlugs[plugIndex].getValue()
 
+    def getCode(self):
+        if not self.inConnections:
+            return f'{self.getTitle()} = {self.inPlugs[0].getValue()}'
+        if self.menuReturnValue == "add":
+            return self.returnAddCode()
+        elif self.menuReturnValue == "update":
+            return self.returnUpdateCode()
+        elif self.menuReturnValue == "remove":
+            return self.returnRemoveCode()
+        elif self.menuReturnValue == "discard":
+            return self.returnDiscardCode()
+        elif self.menuReturnValue == "pop":
+            return self.returnPopCode()
+        elif self.menuReturnValue == "clear":
+            return self.returnClearCode()
+        elif self.menuReturnValue == "reset":
+            return f'{self.getTitle()} = {self.inPlugs[0].getValue()}'
+
     def redesign(self):
         self.changeSize(self.width, self.height)
 
@@ -88,7 +106,7 @@ class SetNode(AbstractNodeInterface):
         if selected_action := contextMenu.exec(position):
             action_func = actions[selected_action.text()]
             action_func()
-
+            self.menuReturnValue = selected_action.text()
         if self.nodeData.outConnections:
             for connection in self.nodeData.outConnections:
                 connection.updateValue()
@@ -123,12 +141,28 @@ class SetNode(AbstractNodeInterface):
         self.menuReturnValue = "add"
         self.redesign()
 
+    def returnAddCode(self):
+        in0Title, in0Code = self.getCodeFromInput(0)
+        in1Title, in1Code = self.getCodeFromInput(1)
+        concat = f'{in0Code}\n{in1Code}\n'
+        returnCode = f"try:\n\t{in0Title}.add({in1Title})\nexcept TypeError:\n\tprint('node must be " \
+                     f"hashable')\nexcept KeyError:\n\tprint('node already in set')"
+        return concat + returnCode
+
     def doUpdate(self):
         self.removeAllUnnecessaryPlugs()
         self.addInPlug("update")
         self.changeInputValue(1, {})
         self.menuReturnValue = "update"
         self.redesign()
+
+    def returnUpdateCode(self):
+        in0Title, in0Code = self.getCodeFromInput(0)
+        in1Title, in1Code = self.getCodeFromInput(1)
+        concat = f'{in0Code}\n{in1Code}\n'
+        returnCode = f"try:\n\t{in0Title}.update({in1Title})\nexcept TypeError:\n\tprint('node must be " \
+                     f"hashable')\nexcept KeyError:\n\tprint('node already in set')"
+        return concat + returnCode
 
     def doRemove(self):
         self.removeAllUnnecessaryPlugs()
@@ -137,12 +171,28 @@ class SetNode(AbstractNodeInterface):
         self.menuReturnValue = "remove"
         self.redesign()
 
+    def returnRemoveCode(self):
+        in0Title, in0Code = self.getCodeFromInput(0)
+        in1Title, in1Code = self.getCodeFromInput(1)
+        concat = f'{in0Code}\n{in1Code}\n'
+        returnCode = f"try:\n\t{in0Title}.remove({in1Title})\nexcept KeyError:\n\tprint('node not in set')\nexcept " \
+                     f"TypeError:\n\tprint('node must be hashable')"
+        return concat + returnCode
+
     def doDiscard(self):
         self.removeAllUnnecessaryPlugs()
         self.addInPlug("discard")
         self.changeInputValue(1, {})
         self.menuReturnValue = "discard"
         self.redesign()
+
+    def returnDiscardCode(self):
+        in0Title, in0Code = self.getCodeFromInput(0)
+        in1Title, in1Code = self.getCodeFromInput(1)
+        concat = f'{in0Code}\n{in1Code}\n'
+        returnCode = f"try:\n\t{in0Title}.discard({in1Title})\nexcept KeyError:\n\tprint('node not in set')\nexcept " \
+                     f"TypeError:\n\tprint('node must be hashable')"
+        return concat + returnCode
 
     def doPop(self):
         self.menuReturnValue = "pop"
@@ -151,11 +201,21 @@ class SetNode(AbstractNodeInterface):
         valueSet.pop()
         self.changeInputValue(0, valueSet)
 
+    def returnPopCode(self):
+        in0Title, in0Code = self.getCodeFromInput(0)
+        returnCode = f"{in0Title}.pop()"
+        return f'{in0Code}\n{returnCode}'
+
     def doClear(self):
         self.menuReturnValue = "clear"
         value = self.inPlugs[0].getValue()
         valueSet = self.checkSet(value)
         valueSet.clear()
+
+    def returnClearCode(self):
+        in0Title, in0Code = self.getCodeFromInput(0)
+        returnCode = f"{in0Title}.clear()"
+        return f'{in0Code}\n{returnCode}'
 
     def doReset(self):
         self.removeAllUnnecessaryPlugs()

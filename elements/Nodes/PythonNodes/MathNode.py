@@ -13,9 +13,10 @@ class MathNode(AbstractNodeInterface):
     menuReturnValue = "+"
     width = 120
     height = 80
-    colorTrain = [QColor(148, 209, 178),QColor(92, 10, 50),QColor(250, 47, 200),QColor(117, 66, 246),QColor(85, 230, 143),QColor(11, 39, 149),QColor(176, 103, 92),QColor(84, 255, 4),]
+    colorTrain = [QColor(148, 209, 178), QColor(92, 10, 50), QColor(250, 47, 200), QColor(117, 66, 246),
+                  QColor(85, 230, 143), QColor(11, 39, 149), QColor(176, 103, 92), QColor(84, 255, 4)]
 
-    def __init__(self, value= 1, inNum=2, outNum=1, parent=None):
+    def __init__(self, value=1, inNum=2, outNum=1, parent=None):
         super().__init__(value, inNum, outNum, parent)
         self.setClassName("MathNode")
         self.setName("SumNode")
@@ -43,9 +44,13 @@ class MathNode(AbstractNodeInterface):
         else:
             print("Error in input")
 
+    def getCode(self):
+        return self.returnMathCode()
+
     def redesign(self):
         self.changeSize(self.width, self.height)
         self.nodeGraphic.setTxtValueReadOnly(True)
+        self.updateAll()
 
     def showContextMenu(self, position):
         contextMenu = QMenu()
@@ -58,6 +63,7 @@ class MathNode(AbstractNodeInterface):
         actionMult = contextMenu.addAction("*")
         actionExp = contextMenu.addAction("**")
         action = contextMenu.exec(position)
+        self.menuReturnValue = action.text()
         if action == actionPlus:
             self.execMenu(actionPlus, "Sum")
         elif action == actionMinus:
@@ -98,3 +104,9 @@ class MathNode(AbstractNodeInterface):
                 connection.updateValue()
         else:
             self.nodeData.calculate()
+
+    def returnMathCode(self):
+        val1Title, val1Code = self.getCodeFromInput(0)
+        val2Title, val2Code = self.getCodeFromInput(1)
+        concatCode = f"{val1Code}\n{val2Code}"
+        return f"{concatCode}\n{self.getTitle()} = {val1Title} {self.menuReturnValue} {val2Title}"

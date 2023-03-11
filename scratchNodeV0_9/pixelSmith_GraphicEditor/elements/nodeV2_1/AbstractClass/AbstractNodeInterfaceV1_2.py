@@ -62,7 +62,7 @@ class AbstractNodeInterface:
             self.nodeData.index = 0
             return self.title
         node = self.canvas.updateTitle(self)
-        return node.title
+        return node.getTitle()
 
     def setColorTrain(self, colorTrain):
         self.nodeGraphic.setColorTrain(colorTrain)

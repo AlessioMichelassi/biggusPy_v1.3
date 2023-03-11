@@ -674,6 +674,7 @@ class CodeToNodeWidget(QWidget):
         code = ast.get_source_segment(self.code, node).strip()
         forNode = self.returnBiggusPyNode("ForNode", [], "ForNode")
         self.createForConditionNode(node, forNode)
+        self.createForBody(code, forNode)
 
     def createForConditionNode(self, node, forNode):
         # condition è un ast.Call ad esempio range(10)
@@ -685,6 +686,11 @@ class CodeToNodeWidget(QWidget):
                 self.createRangeNode(condition, forNode)
             elif condition.func.id == "in":
                 self.createInNode(condition, forNode)
+
+    def createForBody(self, code, forNode):
+        forBody = self.returnBiggusPyNode("StringNode", code, "ForBodyNode")
+        self.setForBodyNodePosition(forBody, forNode)
+        self.createConnection(forBody, forNode)
 
     def checkIterables(self, condition, forNode):
         iterable = self.canvas.getNodeByName(condition.id)

@@ -324,7 +324,7 @@ class Canvas(QWidget):
     def addNode(self, node):
         _node = self.updateTitle(node)
         _node.updateTitle()
-        self.nodesTitleList.append(_node.title)
+        self.nodesTitleList.append(_node.getTitle())
         self.nodes.append(_node)
         self.graphicScene.addItem(_node.nodeGraphic)
 
@@ -343,11 +343,11 @@ class Canvas(QWidget):
         :param node: node to update
         :return:
         """
-        while node.title in self.nodesTitleList:
+        while node.getTitle() in self.nodesTitleList:
             node.index += 1
         node.updateAll()
         node.canvas = self
-        self.nodesTitleList.append(node.title)
+        self.nodesTitleList.append(node.getTitle())
         return node
 
     def addConnection(self, inputNode, inIndex, outputNode, outIndex):
@@ -379,7 +379,7 @@ class Canvas(QWidget):
                 if connection in self.graphicScene.items():
                     self.graphicScene.removeItem(connection)
 
-        self.nodesTitleList.remove(node.title)
+        self.nodesTitleList.remove(node.getTitle())
         self.nodes.remove(node)
 
     def deleteConnection(self, connection):
@@ -387,7 +387,7 @@ class Canvas(QWidget):
 
     def getNodeByTitle(self, title):
         for node in self.nodes:
-            if node.title == title:
+            if node.getTitle() == title:
                 return node
         print(f"node title: {title} not found")
         return None
@@ -449,7 +449,7 @@ class Canvas(QWidget):
 
     def updateNodePosition(self, node, x, y):
         if node is not None:
-            nodeToUpdate = self.getNodeByTitle(node.title)
+            nodeToUpdate = self.getNodeByTitle(node.getTitle())
             nodeToUpdate.setPos(QPointF(x, y))
         else:
             print(f"node {node} not found")
@@ -490,8 +490,12 @@ class Canvas(QWidget):
         _name = deserialized["name"]
         _title = deserialized["title"]
         _index = deserialized["index"]
-        _pos = deserialized["pos"]
         _value = deserialized["resetValue"]
+        try:
+            _menuOperation = deserialized["menuReturnValue"]
+        except:
+            _menuOperation = None
+        _pos = deserialized["pos"]
         _inPlugsNumb = deserialized["inPlugsNumb"]
         _outPlugsNumb = deserialized["outPlugsNumb"]
         # se viene specificata la posizione, aumenta la pos corrente
@@ -510,6 +514,7 @@ class Canvas(QWidget):
                 node = self.createNodeFromDeserialize(_className, _modulePath, value=_value, inNum=_inPlugsNumb,
                                                       outNum=_outPlugsNumb)
                 node.setName(_name)
+                node.setMenuOperation(_menuOperation)
             except Exception as e:
                 print(
                     f"error: {e} in {self.__class__.__name__} {sys._getframe().f_code.co_name} line: {sys._getframe().f_lineno}")

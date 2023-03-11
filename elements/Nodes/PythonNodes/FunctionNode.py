@@ -89,7 +89,7 @@ class FunctionWidget(QWidget):
 
 
 class FunctionNode(AbstractNodeInterface):
-    resetValue = "def default_function(operatorType, arg2):\n    return operatorType + arg2"
+    resetValue = "def default_function(arg1):\n    return arg1 += 1"
     functionString = resetValue
     menuReturnValue = ""
     function = None
@@ -167,6 +167,9 @@ class FunctionNode(AbstractNodeInterface):
                 self.functionWidget.lineEdit.setText(str(self.outPlugs[plugIndex].getValue()))
         return self.outPlugs[plugIndex].getValue()
 
+    def getCode(self):
+        return self.returnFunctionCode()
+
     def createProxyWidget(self):
         self.functionWidget = FunctionWidget(self, self.nodeGraphic.colorFill)
         self.nodeGraphic.setProxyWidget(self.functionWidget)
@@ -184,4 +187,19 @@ class FunctionNode(AbstractNodeInterface):
         outNum = len(self.outPlugs)
         resetValue = self.functionString
         return FunctionNode(resetValue, inNum, outNum)
+
+    def returnFunctionCode(self):
+        functionString = self.functionString
+        argsTitle = []
+        concatCode = f"{functionString}\n"
+        for n in range(len(self.inPlugs)):
+            title, code = self.getCodeFromInput(n)
+            concatCode += f"\n{code}"
+            argsTitle.append(title)
+        print(f"DEBUG FROM FUNCTION NODE:\n{concatCode}")
+
+        funcName = functionString.split("(")[0].replace("def ", "").strip()
+        functionDefinition = f"{funcName}({', '.join(argsTitle)})"
+        return f"{concatCode}\n{self.getTitle()} = {functionDefinition}"
+
 

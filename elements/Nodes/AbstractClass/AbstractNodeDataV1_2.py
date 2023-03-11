@@ -77,6 +77,13 @@ class AbstractNodeData:
         for i in range(len(self.outPlugs)):
             self.nodeInterface.calculateOutput(i)
 
+    def calculateCode(self):
+        """
+        Calculate the code of the node
+        :return:
+        """
+        return self.nodeInterface.getCode()
+
     def checkInput(self, _type):
         """
         Check if the input is All of correct type
@@ -100,9 +107,8 @@ class AbstractNodeData:
 
     def inConnect(self, connection):
         inPlug = connection.inputPlug
-        for plug in self.inPlugs:
-            if plug.index == inPlug.index:
-                plug.inConnection = connection
+        inPlug.inConnection = connection
+        self.inConnections = connection
 
     def disconnect(self, node, nodePlugIndex):
         """

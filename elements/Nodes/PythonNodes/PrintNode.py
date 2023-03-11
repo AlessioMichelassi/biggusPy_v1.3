@@ -93,6 +93,10 @@ class PrintNode(AbstractNodeInterface):
         self.printWidget.setText(str(value))
         return self.outPlugs[plugIndex].getValue()
 
+    def getCode(self):
+        inTitle, inCode = self.getCodeFromInput(0)
+        return f"{inCode}\nprint({inTitle})"
+
     def redesign(self):
         self.changeSize(self.width, self.height)
 

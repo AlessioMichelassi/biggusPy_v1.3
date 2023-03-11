@@ -58,6 +58,23 @@ class PlugData:
             if "Out" in self.className and self.index == 0:
                 self.plugGraphic.nodeGraphic.setTextValueOnQLineEdit(value)
 
+    def getCode(self):
+        """
+        ITA:
+            Questo metodo viene chiamato quando si vuole ottenere il codice del nodo.
+            In questo caso viene restituita la stringa nomeDelNodo = valoreDelPlug
+        ENG:
+            This method is called when you want to get the node code.
+            In this case the string nodeName = plugValue is returned
+        :return:
+        """
+        name = self.plugGraphic.nodeGraphic.nodeInterface.getTitle()
+
+        return f"{name} = {self.getValue()}"
+
+    def getNode(self):
+        return self.plugGraphic.nodeGraphic.nodeInterface
+
     def resetPlug(self):
         self._value = self.resetValue
 

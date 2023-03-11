@@ -22,6 +22,7 @@ for x in fruits:
   print(x)
 """
 
+
 class ForNode(AbstractNodeInterface):
     resetValue = []
     startFunction = lambda x: x
@@ -41,24 +42,36 @@ class ForNode(AbstractNodeInterface):
         self.changeInputValue(0, value, True)
         self.setPlugInTitle(0, "iterable")
         self.setPlugInTitle(1, "function")
-        self.changeInputValue(1, self.startFunction, True)
+        self.changeInputValue(1, None, True)
 
     def calculateOutput(self, plugIndex):
-        iterable = self.inPlugs[0].getValue()
+        iterable = self.inPlugs[0].getCode()
         function = self.inPlugs[1].getValue()
         if function is not None:
             try:
-                functionGlobals = {}
-                exec(function, functionGlobals)
-                returnFunction = functionGlobals["function"]
-                returnValue = [returnFunction(value) for value in iterable]
+                function_code = compile(function, "<string>", "exec")
+                local_context = {"iterable": iterable}
+                global_context = {}
+                exec(function_code, global_context, local_context)
+                returnValue = local_context.get("returnValue", [])
             except Exception as e:
                 print(f"WARNING FROM FOR NODE: FUNCTION IS NOT VALID\n{e}")
-                print("__"*20)
+                print("__" * 20)
                 returnValue = []
             self.outPlugs[plugIndex].setValue(returnValue)
         return self.outPlugs[plugIndex].getValue()
 
+    def executeForBody(self, code, element):
+        # Creazione del dizionario con le variabili da utilizzare all'interno della funzione
+        local_vars = {"elements": element}
 
+        # Esecuzione del codice all'interno del for, passando il dizionario delle variabili
+        # e catturando eventuali errori
+        try:
+            exec(code, globals(), local_vars)
+            result = local_vars.get("returnValue", None)
+        except Exception as e:
+            print(f"ERROR: {e}")
+            result = None
 
-
+        return result

@@ -48,11 +48,20 @@ class DictionaryNode(AbstractNodeInterface):
         self.outPlugs[plugIndex].setValue(result)
         return self.outPlugs[plugIndex].getValue()
 
+    def getCode(self):
+        if not self.inConnections:
+            return f'{self.getTitle()} = {self.inPlugs[0].getValue()}'
+        inPlugNodeName1, code1 = self.getCodeFromInput(0)
+        inPlugNodeName2, code2 = self.getCodeFromInput(1)
+        return (
+            f'{self.getTitle()} = {self.inPlugs[0].getValue()}'
+            if inPlugNodeName1 is None
+            else f'{code1}\n{code2}\n{self.getTitle()} = {inPlugNodeName1} {self.menuReturnValue} {inPlugNodeName2}')
+
     def redesign(self):
         self.changeSize(self.width, self.height)
 
-    @staticmethod
-    def checkDict(value):
+    def checkDict(self, value):
         if not isinstance(value, dict):
-            raise ValueError("Value must be a dictionary")
-        return value
+            print("Value is not a dictionary. Resetting to default.")
+        return self.startValue

@@ -26,6 +26,10 @@ class IfNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
         self.changeInputValue(0, value, True)
         self.changeInputValue(1, value, True)
+        self.setPlugInTitle(0, "leftOp")
+        self.setPlugInTitle(1, "rightOp")
+        self.setPlugInTitle(2, "trueFunction")
+        self.setPlugInTitle(3, "falseFunction")
 
     def calculateOutput(self, plugIndex):
         val1 = self.inPlugs[0].getValue()
@@ -49,6 +53,9 @@ class IfNode(AbstractNodeInterface):
                 self.outPlugs[plugIndex].setValue(value)
         self.nodeGraphic.updateTxtValuePosition()
         return self.outPlugs[plugIndex].getValue()
+
+    def getCode(self):
+        return self.returnIfCode()
 
     def showContextMenu(self, position):
         contextMenu = QMenu()
@@ -85,6 +92,16 @@ class IfNode(AbstractNodeInterface):
                 connection.updateValue()
         else:
             self.nodeData.calculate()
+
+    def returnIfCode(self):
+        leftTitle, leftCode = self.getCodeFromInput(0)
+        rightTitle, rightCode = self.getCodeFromInput(1)
+        returnTrueTitle, returnTrueCode = self.getCodeFromInput(2)
+        returnFalseTitle, returnFalseCode = self.getCodeFromInput(3)
+        concatCode = f"{leftCode}\n{rightCode}\n{returnTrueCode}\n{returnFalseCode}"
+        ifCode = f"if {leftTitle} {self.menuReturnValue} {rightTitle}:\n"
+        ifBody = f"    return {returnTrueTitle}\nelse:\n    return {returnFalseTitle}"
+        return f"{concatCode}\n{ifCode}{ifBody}"
 
     def setOperator(self, operator):
         self.menuReturnValue = operator

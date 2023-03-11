@@ -28,6 +28,15 @@ class NumberNode(AbstractNodeInterface):
         self.outPlugs[plugIndex].setValue(value)
         return self.outPlugs[plugIndex].getValue()
 
+    def getCode(self):
+        if not self.inConnections:
+            return f'{self.getTitle()} = {self.inPlugs[0].getValue()}'
+        inPlugNodeName, code = self.getCodeFromInput(0)
+        return (
+            f'{self.getTitle()} = {self.inPlugs[0].getValue()}'
+            if inPlugNodeName is None
+            else f'{code}\n{self.getTitle()} = int({inPlugNodeName})')
+
     def redesign(self):
         self.changeSize(self.width, self.height)
 

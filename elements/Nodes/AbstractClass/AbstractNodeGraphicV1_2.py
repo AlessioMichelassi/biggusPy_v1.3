@@ -226,10 +226,13 @@ class AbstractNodeGraphic(QGraphicsItem):
         self.thread = None
 
     def __str__(self):
-        return f"Node className: {self.nodeInterface.nodeData.className}" \
-               f" name: {self.nodeInterface.nodeData.name} index: {self.nodeInterface.nodeData.index}" \
-               f" title: {self.nodeInterface.nodeData.getTitle()}" \
-               f" node: {self.nodeInterface.resetValue}"
+        nodeIdentification = f"Node className: {self.nodeInterface.nodeData.className}" \
+                                f" name: {self.nodeInterface.nodeData.name} index: {self.nodeInterface.nodeData.index}\n"
+        nodeValue = f"\t\tcurrent outValue: {self.outPlugs[0].plugData.getValue()} resetValue: {self.nodeInterface.resetValue}\n"
+        nodeCode = f"\t\tcode:\n{self.nodeInterface.getCode()}\n"
+        nodeConnections = f"\t\tinConnections: {self.nodeInterface.inConnections}\n" \
+                            f"\t\toutConnections: {self.nodeInterface.outConnections}\n"
+        return nodeIdentification + nodeValue + nodeCode + nodeConnections
 
     def boundingRect(self):
         return self.boundingRectangle.normalized()
