@@ -8,11 +8,17 @@ from PyQt5.QtWidgets import *
 import configparser
 
 from widgets.Canvas.Canvas import Canvas
+from widgets.Canvas.nodeBrowser import NodeBrowser
+from widgets.Canvas.terminal import Terminal
 
 from widgets.Menu.biggusMenu import BiggusMenu
 
 
 class biggusPy(QMainWindow):
+
+    canvas: Canvas
+    nodeBrowser: NodeBrowser
+    terminal: Terminal
     statusMousePosition: QLabel
     path = "saveDir"
     fileName = "untitled"
@@ -25,18 +31,43 @@ class biggusPy(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
         self.setWindowTitle("BiggusPy(a great Caesar's friend) V0.1.3")
         self.setWindowIcon(QIcon('elements/imgs/BiggusIcon.ico'))
-        self.canvas = Canvas()
-        self.setCentralWidget(self.canvas)
+        self.initUI()
+
+    def initUI(self):
+        lay1 = self.initCanvas()
+        lay2 = self.initNodeBrowser()
+        # il node browser non essere più grande di 1/3 del canvas
+        self.initSize()
+        mainLayout = QVBoxLayout()
+        mainLayout.addLayout(lay1)
+        mainLayout.addLayout(lay2)
+        mainWidget = QWidget()
+        mainWidget.setLayout(mainLayout)
+        self.setCentralWidget(mainWidget)
         menu = BiggusMenu(self)
         self.setMenuBar(menu)
         self.createStatusBar()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.saveRecentFiles(self.recentFiles)
-
     def initCanvas(self):
         self.canvas = Canvas()
-        self.setCentralWidget(self.canvas)
+        layout = QHBoxLayout()
+        layout.addWidget(self.canvas)
+        return layout
+
+    def initNodeBrowser(self):
+        self.nodeBrowser = NodeBrowser()
+        self.terminal = Terminal()
+        layout = QHBoxLayout()
+        layout.addWidget(self.nodeBrowser)
+        layout.addWidget(self.terminal)
+        return layout
+
+    def initSize(self):
+        self.nodeBrowser.setFixedHeight(int(self.canvas.rect().height() / 3))
+
+    def initConnections(self):
+        self.canvas.graphicView.scenePosChanged.connect(self.onScenePosChanged)
+        self.terminal.terminalSignal.connect(self.onTerminalInput)
 
     def restartCanvas(self):
         self.canvas.cleanTheScene()
@@ -47,7 +78,6 @@ class biggusPy(QMainWindow):
         self.statusBar().showMessage("")
         self.statusMousePosition = QLabel("")
         self.statusBar().addPermanentWidget(self.statusMousePosition)
-        self.canvas.graphicView.scenePosChanged.connect(self.onScenePosChanged)
 
     def onScenePosChanged(self, x, y):
         self.statusMousePosition.setText(f"Scene Pos: {x}:{y}")
@@ -102,3 +132,6 @@ class biggusPy(QMainWindow):
 
     def printOnStatusBar(self, text):
         self.statusBar().showMessage(text, 2000)
+
+    def onTerminalInput(self, command):
+        self.printOnStatusBar(command)

@@ -160,7 +160,7 @@ class VideoPlayerNode(AbstractNodeInterface):
         self.changeSize(self.width, self.height)
 
     def showContextMenu(self, position):
-        contextMenu = QMenu(self)
+        contextMenu = QMenu()
         contextMenu.addSection("change name of menu here")
         action1 = contextMenu.addAction("action1")
         action2 = contextMenu.addAction("action2")

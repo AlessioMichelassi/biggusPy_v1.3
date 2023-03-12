@@ -49,6 +49,7 @@ class Connection(QGraphicsItem):
             for connection in self.inputNode.outConnections:
                 connection.updateValue()
 
+
     def disconnect(self):
         if self in self.inputNode.outConnections:
             self.inputNode.outConnections.remove(self)

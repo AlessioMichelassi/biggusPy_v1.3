@@ -1,3 +1,5 @@
+from PyQt5.QtCore import pyqtSignal
+
 from elements.Plugs.PlugGraphic import PlugGraphic
 
 

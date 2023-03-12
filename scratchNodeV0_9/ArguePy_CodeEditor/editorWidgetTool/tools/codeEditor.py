@@ -298,7 +298,6 @@ class pythonCodeEditor(QPlainTextEdit):
         self.document().contentsChanged.connect(self.searchIndentation)
         self.zoomLevel = 1.0
 
-
     def initUI(self):
         self.setTabStopWidth(4)
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
@@ -348,7 +347,7 @@ class pythonCodeEditor(QPlainTextEdit):
     def event(self, QEvent):
         if QEvent.type() == QEvent.Type.KeyPress:
             if QEvent.key() == Qt.Key.Key_Tab:
-                if self.textCursor().hasSelection(): # se una parte del testo è selezionata
+                if self.textCursor().hasSelection():  # se una parte del testo è selezionata
                     self.indentSelectedText()
                 else:
                     self.insertPlainText("    ")
@@ -362,7 +361,7 @@ class pythonCodeEditor(QPlainTextEdit):
     def keyPressEvent(self, event):
         # Auto completamento delle parentesi
         if event.key() in [Qt.Key.Key_BraceLeft, Qt.Key.Key_BracketLeft, Qt.Key.Key_ParenLeft, Qt.Key.Key_QuoteDbl,
-                             Qt.Key.Key_Apostrophe]:
+                           Qt.Key.Key_Apostrophe]:
             self.parenthesesAutoComplete(event)
         elif event.key() == Qt.Key.Key_Return:
             self.insertNewLine()
@@ -488,7 +487,7 @@ class pythonCodeEditor(QPlainTextEdit):
         :param wholeWords:
         :return:
         """
-        #posiziona il cursore all'inizio del testo
+        # posiziona il cursore all'inizio del testo
         self.moveCursor(QTextCursor.MoveOperation.Start)
         # Il Flag di ricerca è un intero che può essere combinato con l'operatore |
 
