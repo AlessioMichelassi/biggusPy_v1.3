@@ -1,0 +1,1 @@
+{"name": "Untitled", "sceneWidth": 10000, "sceneHeight": 10000, "Nodes": ["{\n    \"className\": \"ImageViewer\",\n    \"name\": \"ImageViewer\",\n    \"title\": \"ImageViewer_0\",\n    \"index\": 0,\n    \"resetValue\": 0,\n    \"pos\": [\n        -53,\n        -36\n    ],\n    \"inPlugsNumb\": 2,\n    \"outPlugsNumb\": 1,\n    \"connections\": []\n}"]}

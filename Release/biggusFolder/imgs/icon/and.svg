@@ -1,0 +1,5 @@
+<svg width="80" height="40" viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
+  <rect x="8" y="8" width="64" height="24" fill="#55b1ff" />
+  <circle cx="40" cy="20" r="10" fill="#ffffff" />
+  <text x="40" y="22" text-anchor="middle" font-size="14" fill="#000000">AND</text>
+</svg>

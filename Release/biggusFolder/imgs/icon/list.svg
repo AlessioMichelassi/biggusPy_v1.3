@@ -1,0 +1,9 @@
+<svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="80" height="80" fill="#fcba03" />
+  <rect x="18" y="18" width="64" height="64" fill="#ffffff" />
+  <circle cx="26" cy="50" r="5" fill="#fcba03" />
+  <circle cx="34" cy="50" r="5" fill="#fcba03" />
+  <circle cx="42" cy="50" r="5" fill="#fcba03" />
+  <text x="50" y="50" text-anchor="middle" font-size="30" fill="#fcba03">List</text>
+</svg>
+

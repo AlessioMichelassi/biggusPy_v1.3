@@ -1,0 +1,8 @@
+<svg width="80" height="40" viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0.5" y="0.5" width="79" height="39" rx="4.5" stroke="#E5E7EB"/>
+  <circle cx="20" cy="20" r="8" fill="#55B1FF"/>
+  <circle cx="40" cy="20" r="8" fill="#55B1FF"/>
+  <circle cx="60" cy="20" r="8" fill="#55B1FF"/>
+  <text x="20" y="30" font-size="12" text-anchor="middle">Tuple</text>
+</svg>
+

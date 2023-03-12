@@ -1,0 +1,6 @@
+<svg width="100%" height="100%" viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="60" height="20" fill="#55b1ff" />
+  <rect x="15" y="15" width="20" height="10" fill="#ffffff" />
+  <text x="50" y="25" text-anchor="middle" font-size="12" fill="#FFFFFF">IF</text>
+</svg>
+
